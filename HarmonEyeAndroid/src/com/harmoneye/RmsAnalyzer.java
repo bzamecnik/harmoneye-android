@@ -3,6 +3,9 @@ package com.harmoneye;
 public class RmsAnalyzer implements SoundConsumer {
 	private Visualizer<Double> visualizer;
 
+	private ExpSmoother accumulator = new ExpSmoother(1, 0.25);
+	private double[] frame = new double[1];
+
 	public RmsAnalyzer(Visualizer<Double> visualizer) {
 		this.visualizer = visualizer;
 	}
@@ -10,7 +13,8 @@ public class RmsAnalyzer implements SoundConsumer {
 	@Override
 	public void consume(double[] samples) {
 		double rms = computeRms(samples);
-		visualizer.update(rms);
+		frame[0] = rms;
+		visualizer.update(accumulator.smooth(frame)[0]);
 	}
 
 	private double computeRms(double[] samples) {
@@ -20,5 +24,4 @@ public class RmsAnalyzer implements SoundConsumer {
 		}
 		return Math.sqrt(sum / (double) samples.length);
 	}
-
 }
