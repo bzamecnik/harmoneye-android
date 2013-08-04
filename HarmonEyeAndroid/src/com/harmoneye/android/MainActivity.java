@@ -13,7 +13,7 @@ public class MainActivity extends Activity {
 
 	private TextView textView;
 
-	private SoundConsumer soundConsumer;
+	private Capture soundCapture;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -24,26 +24,32 @@ public class MainActivity extends Activity {
 	}
 
 	private void toggle() {
-		boolean isRunning = soundConsumer != null && soundConsumer.isRunning();
+		boolean isRunning = soundCapture != null && soundCapture.isRunning();
 		if (isRunning) {
 			stop();
 		} else {
-			soundConsumer = new SoundConsumer(this);
-			Thread thread = new Thread(soundConsumer);
+			soundCapture = new Capture(this);
+			Thread thread = new Thread(soundCapture);
 			thread.start();
 		}
-		Log.i(LOG_TAG, soundConsumer.isRunning() ? "running" : "stopped");
+		Log.i(LOG_TAG, soundCapture.isRunning() ? "running" : "stopped");
 	}
 
 	private void stop() {
-		if (soundConsumer != null) {
-			soundConsumer.stop();
+		if (soundCapture != null) {
+			soundCapture.stop();
 		}
 	}
 
-	void printText(String text) {
+	public void printText(String text) {
 		textView.setText(text);
 		textView.invalidate();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		printText("Click to toggle recording.");
 	}
 
 	@Override

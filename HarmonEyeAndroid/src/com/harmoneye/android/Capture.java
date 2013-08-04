@@ -1,11 +1,15 @@
 package com.harmoneye.android;
 
+import com.harmoneye.RmsAnalyzer;
+import com.harmoneye.SoundConsumer;
+import com.harmoneye.Visualizer;
+
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-public class SoundConsumer implements Runnable {
+public class Capture implements Runnable {
 
 	private static final int AUDIO_SAMPLE_RATE = 44100;
 	private static final int AUDIO_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
@@ -14,17 +18,19 @@ public class SoundConsumer implements Runnable {
 	// signed short to [-1; 1]
 	private static final double SHORT_TO_DOUBLE = 2 / (double) 0xffff;
 
-	private boolean running;
 	private AudioRecord recorder;
+
+	private SoundConsumer soundConsumer;
+	private MainActivity activity;
+
+	private boolean running;
 
 	private int bufferSizeInBytes;
 	private int bufferSizeInSamples;
-	private short[] buffer;
+	private short[] rawSamples;
+	private double[] amplitudes;
 
-	private MainActivity activity;
-
-	public SoundConsumer(MainActivity activity) {
-		this.activity = activity;
+	public Capture(MainActivity activity) {
 
 		bufferSizeInBytes = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE, AUDIO_CHANNELS, AUDIO_FORMAT);
 
@@ -33,24 +39,29 @@ public class SoundConsumer implements Runnable {
 		}
 
 		bufferSizeInSamples = bufferSizeInBytes / 2;
-		buffer = new short[bufferSizeInSamples];
+		rawSamples = new short[bufferSizeInSamples];
+		amplitudes = new double[bufferSizeInSamples];
 		Log.i(MainActivity.LOG_TAG, "Buffer initialized with size: " + bufferSizeInBytes + " B");
+
+		this.activity = activity;
+		Visualizer<Double> visualizer = new SingleValueVisualizer(activity);
+		this.soundConsumer = new RmsAnalyzer(visualizer);
 	}
 
 	public void run() {
 		running = true;
 		try {
-			recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, AUDIO_SAMPLE_RATE, AUDIO_CHANNELS,
-				AUDIO_FORMAT, bufferSizeInBytes);
+			recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, AUDIO_SAMPLE_RATE, AUDIO_CHANNELS, AUDIO_FORMAT,
+				bufferSizeInBytes);
 			if (recorder == null) {
-				updateTextView("Could not initialize the AudioRecord.");
+				printText("Could not initialize the AudioRecord.");
 				return;
 			}
 			recorder.startRecording();
 			while (running) {
-				recorder.read(buffer, 0, bufferSizeInSamples);
-				double rms = getRms(buffer);
-				updateTextView("> " + doubleToStars(rms));
+				recorder.read(rawSamples, 0, bufferSizeInSamples);
+				toAmplitudes(rawSamples, amplitudes);
+				soundConsumer.consume(amplitudes);
 			}
 			recorder.stop();
 		} finally {
@@ -68,30 +79,18 @@ public class SoundConsumer implements Runnable {
 		return running;
 	}
 
-	private static double getRms(short[] values) {
-		double sum = 0;
-		for (short value : values) {
-			double amplitide = value * SHORT_TO_DOUBLE;
-			sum += amplitide * amplitide;
-		}
-		return Math.sqrt(sum / (double) values.length);
-	}
-
-	private static String doubleToStars(double amplitude) {
-		StringBuilder sb = new StringBuilder();
-		int starCount = (int) Math.round(amplitude * 100);
-		for (int i = 0; i < starCount; i++) {
-			sb.append('*');
-		}
-		return sb.toString();
-	}
-
-	private void updateTextView(final String text) {
+	private void printText(final String text) {
 		activity.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				activity.printText(text);
 			}
 		});
+	}
+
+	private void toAmplitudes(short[] buffer, double[] amplitudes) {
+		for (int i = 0; i < bufferSizeInSamples; i++) {
+			amplitudes[i] = buffer[i] * SHORT_TO_DOUBLE;
+		}
 	}
 }
