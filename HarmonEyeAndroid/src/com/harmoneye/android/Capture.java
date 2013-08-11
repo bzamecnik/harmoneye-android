@@ -18,6 +18,8 @@ public class Capture implements Runnable {
 	// signed short to [-1; 1]
 	private static final double SHORT_TO_DOUBLE = 2 / (double) 0xffff;
 
+	private final double DB_THRESHOLD = -(20 * Math.log10(2 << (16 - 1)));
+
 	private AudioRecord recorder;
 
 	private SoundConsumer soundConsumer;
@@ -44,7 +46,7 @@ public class Capture implements Runnable {
 		Log.i(MainActivity.LOG_TAG, "Buffer initialized with size: " + bufferSizeInBytes + " B");
 
 		this.activity = activity;
-		Visualizer<Double> visualizer = new SingleValueVisualizer(activity);
+		Visualizer<Double> visualizer = new GraphVisualizer(activity, activity.getGraphViewSeries());
 		this.soundConsumer = new RmsAnalyzer(visualizer);
 	}
 
@@ -61,6 +63,7 @@ public class Capture implements Runnable {
 			while (running) {
 				recorder.read(rawSamples, 0, bufferSizeInSamples);
 				toAmplitudes(rawSamples, amplitudes);
+				toDecibel(amplitudes);
 				soundConsumer.consume(amplitudes);
 			}
 			recorder.stop();
@@ -93,4 +96,17 @@ public class Capture implements Runnable {
 			amplitudes[i] = buffer[i] * SHORT_TO_DOUBLE;
 		}
 	}
+
+	private void toDecibel(double[] amplitudes) {
+		for (int i = 0; i < amplitudes.length; i++) {
+			double amplitude = Math.abs(amplitudes[i]);
+			double referenceAmplitude = 1;
+			double amplitudeDb = 20 * Math.log10(amplitude / referenceAmplitude);
+			if (amplitudeDb < DB_THRESHOLD) {
+				amplitudeDb = DB_THRESHOLD;
+			}
+			double scaledAmplitudeDb = amplitudeDb / DB_THRESHOLD;
+			amplitudes[i] = scaledAmplitudeDb;
+		}
+	}	
 }

@@ -7,20 +7,42 @@ import android.view.Menu;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GraphView.GraphViewData;
+import com.jjoe64.graphview.GraphViewSeries;
+import com.jjoe64.graphview.LineGraphView;
+
 public class MainActivity extends Activity {
 
 	static final String LOG_TAG = "HarmonEye";
 
+	private Capture soundCapture;
+
 	private TextView textView;
 
-	private Capture soundCapture;
+	private GraphView graphView;
+	private GraphViewSeries graphViewSeries;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		textView = new TextView(this);
-		setContentView(textView);
+		//		textView = new TextView(this);
+		//		setContentView(textView);
+
+		graphViewSeries = new GraphViewSeries(new GraphViewData[] {
+			new GraphViewData(0, 0)
+		});
+
+		graphView = new LineGraphView(this, "GraphViewDemo");
+		graphView.addSeries(graphViewSeries);
+		graphView.setScrollable(true);
+		graphView.setViewPort(0, 120);
+		graphView.setManualYAxisBounds(0.0, 1.0);
+
+		setContentView(graphView);
+		
+		toggle();
 	}
 
 	private void toggle() {
@@ -42,8 +64,10 @@ public class MainActivity extends Activity {
 	}
 
 	public void printText(String text) {
-		textView.setText(text);
-		textView.invalidate();
+		if (textView != null) {
+			textView.setText(text);
+			textView.invalidate();
+		}
 	}
 
 	@Override
@@ -82,4 +106,7 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
+	public GraphViewSeries getGraphViewSeries() {
+		return graphViewSeries;
+	}
 }
