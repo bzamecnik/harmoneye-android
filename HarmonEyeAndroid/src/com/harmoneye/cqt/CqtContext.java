@@ -124,6 +124,7 @@ public final class CqtContext {
 		return windowIntegral;
 	}
 
+	/** number of samples per signal block */
 	public int getSignalBlockSize() {
 		return signalBlockSize;
 	}
