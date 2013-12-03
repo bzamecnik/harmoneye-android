@@ -1,5 +1,7 @@
 package com.harmoneye.android;
 
+import com.harmoneye.MusicAnalyzer;
+import com.harmoneye.PitchClassProfile;
 import com.harmoneye.RmsAnalyzer;
 import com.harmoneye.SoundConsumer;
 import com.harmoneye.Visualizer;
@@ -42,8 +44,11 @@ public class Capture implements Runnable {
 		amplitudes = new double[bufferSizeInSamples];
 		Log.i(MainActivity.LOG_TAG, "Buffer initialized with size: " + bufferSizeInBytes + " B");
 
-		Visualizer<Double> visualizer = new GraphVisualizer(activity, activity.getGraphViewSeries());
-		this.soundConsumer = new RmsAnalyzer(visualizer);
+//		Visualizer<Double> visualizer = new GraphVisualizer(activity, activity.getGraphViewSeries());
+//		this.soundConsumer = new RmsAnalyzer(visualizer);
+		
+		Visualizer<PitchClassProfile> visualizer = new TextPitchClassVisualizer(activity);
+		this.soundConsumer = new MusicAnalyzer(visualizer);
 	}
 
 	public void run() {

@@ -20,27 +20,27 @@ public class MainActivity extends Activity {
 
 	private TextView textView;
 
-	private GraphView graphView;
-	private GraphViewSeries graphViewSeries;
+//	private GraphView graphView;
+//	private GraphViewSeries graphViewSeries;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		//		textView = new TextView(this);
-		//		setContentView(textView);
+				textView = new TextView(this);
+				setContentView(textView);
 
-		graphViewSeries = new GraphViewSeries(new GraphViewData[] {
-			new GraphViewData(0, 0)
-		});
-
-		graphView = new LineGraphView(this, "GraphViewDemo");
-		graphView.addSeries(graphViewSeries);
-		graphView.setScrollable(true);
-		graphView.setViewPort(0, 120);
-		graphView.setManualYAxisBounds(1.0, 0.0);
-
-		setContentView(graphView);
+//		graphViewSeries = new GraphViewSeries(new GraphViewData[] {
+//			new GraphViewData(0, 0)
+//		});
+//
+//		graphView = new LineGraphView(this, "GraphViewDemo");
+//		graphView.addSeries(graphViewSeries);
+//		graphView.setScrollable(true);
+//		graphView.setViewPort(0, 120);
+//		graphView.setManualYAxisBounds(1.0, 0.0);
+//
+//		setContentView(graphView);
 		
 		toggle();
 	}
@@ -106,7 +106,7 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
-	public GraphViewSeries getGraphViewSeries() {
-		return graphViewSeries;
-	}
+//	public GraphViewSeries getGraphViewSeries() {
+//		return graphViewSeries;
+//	}
 }
