@@ -1,6 +1,7 @@
 package com.harmoneye.android;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -50,7 +51,9 @@ public class MainActivity extends Activity {
 		if (isRunning) {
 			stop();
 		} else {
-			soundCapture = new Capture(this);
+			if (soundCapture == null) {
+				soundCapture = new Capture(this);
+			}
 			Thread thread = new Thread(soundCapture);
 			thread.start();
 		}
@@ -109,4 +112,11 @@ public class MainActivity extends Activity {
 //	public GraphViewSeries getGraphViewSeries() {
 //		return graphViewSeries;
 //	}
+	// prevent re-creating the activity on screen rotation
+	// http://stackoverflow.com/questions/456211/activity-restart-on-rotation-android
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		setContentView(textView);
+	}
 }
