@@ -1,5 +1,7 @@
 package com.harmoneye.android;
 
+import org.apache.commons.lang3.time.StopWatch;
+
 import com.harmoneye.MusicAnalyzer;
 import com.harmoneye.PitchClassProfile;
 import com.harmoneye.RmsAnalyzer;
@@ -48,7 +50,12 @@ public class Capture implements Runnable {
 //		this.soundConsumer = new RmsAnalyzer(visualizer);
 		
 		Visualizer<PitchClassProfile> visualizer = new TextPitchClassVisualizer(activity);
+		
+		StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
 		this.soundConsumer = new MusicAnalyzer(visualizer);
+		stopWatch.stop();
+		Log.i(MainActivity.LOG_TAG, "Initialized the MusicAnalyzer in " + stopWatch.getTime() + " ms");
 	}
 
 	public void run() {
