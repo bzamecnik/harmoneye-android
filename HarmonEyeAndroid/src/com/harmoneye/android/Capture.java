@@ -21,13 +21,12 @@ public class Capture implements Runnable {
 	private AudioRecord recorder;
 
 	private SoundConsumer soundConsumer;
-	private MainActivity activity;
 
 	private boolean running;
 
 	private int bufferSizeInBytes;
 	private int bufferSizeInSamples;
-	private short[] rawSamples;
+	private short[] samples;
 	private double[] amplitudes;
 
 	public Capture(MainActivity activity) {
@@ -39,11 +38,10 @@ public class Capture implements Runnable {
 		}
 
 		bufferSizeInSamples = bufferSizeInBytes / 2;
-		rawSamples = new short[bufferSizeInSamples];
+		samples = new short[bufferSizeInSamples];
 		amplitudes = new double[bufferSizeInSamples];
 		Log.i(MainActivity.LOG_TAG, "Buffer initialized with size: " + bufferSizeInBytes + " B");
 
-		this.activity = activity;
 		Visualizer<Double> visualizer = new GraphVisualizer(activity, activity.getGraphViewSeries());
 		this.soundConsumer = new RmsAnalyzer(visualizer);
 	}
@@ -51,16 +49,16 @@ public class Capture implements Runnable {
 	public void run() {
 		running = true;
 		try {
-			recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, AUDIO_SAMPLE_RATE, AUDIO_CHANNELS, AUDIO_FORMAT,
-				bufferSizeInBytes);
+			recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, AUDIO_SAMPLE_RATE, AUDIO_CHANNELS,
+					AUDIO_FORMAT, bufferSizeInBytes);
 			if (recorder == null) {
-				printText("Could not initialize the AudioRecord.");
+				Log.e(MainActivity.LOG_TAG, "Could not initialize the AudioRecord.");
 				return;
 			}
 			recorder.startRecording();
 			while (running) {
-				recorder.read(rawSamples, 0, bufferSizeInSamples);
-				toAmplitudes(rawSamples, amplitudes);
+				recorder.read(samples, 0, bufferSizeInSamples);
+				toAmplitudes(samples, amplitudes);
 				soundConsumer.consume(amplitudes);
 			}
 			recorder.stop();
@@ -79,18 +77,9 @@ public class Capture implements Runnable {
 		return running;
 	}
 
-	private void printText(final String text) {
-		activity.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				activity.printText(text);
-			}
-		});
-	}
-
-	private void toAmplitudes(short[] buffer, double[] amplitudes) {
+	private void toAmplitudes(short[] samples, double[] amplitudes) {
 		for (int i = 0; i < bufferSizeInSamples; i++) {
-			amplitudes[i] = buffer[i] * SHORT_TO_DOUBLE;
+			amplitudes[i] = samples[i] * SHORT_TO_DOUBLE;
 		}
 	}
 
