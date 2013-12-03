@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
 		graphView.addSeries(graphViewSeries);
 		graphView.setScrollable(true);
 		graphView.setViewPort(0, 120);
-		graphView.setManualYAxisBounds(0.0, 1.0);
+		graphView.setManualYAxisBounds(1.0, 0.0);
 
 		setContentView(graphView);
 		
