@@ -10,12 +10,16 @@ import com.harmoneye.util.DoubleCircularBuffer;
 
 public class MusicAnalyzer implements SoundConsumer {
 
+	/** [0.0; 1.0] 1.0 = no smoothing */
+	private static final double SMOOTHING_FACTOR = 0.25;
+
 	private CqtContext ctx;
 
 	private FastCqt cqt;
 	private DoubleCircularBuffer amplitudeBuffer;
 	private HarmonicPatternPitchClassDetector pcDetector;
 	private Visualizer<PitchClassProfile> visualizer;
+	private ExpSmoother binSmoother;
 
 	private double[] amplitudes;
 	/** peak amplitude spectrum */
@@ -27,7 +31,8 @@ public class MusicAnalyzer implements SoundConsumer {
 
 	private boolean initialized;
 
-	public MusicAnalyzer(Visualizer<PitchClassProfile> visualizer, int sampleRate, int bitsPerSample) {
+	public MusicAnalyzer(Visualizer<PitchClassProfile> visualizer,
+		int sampleRate, int bitsPerSample) {
 		this.visualizer = visualizer;
 
 		dbThreshold = -(20 * FastMath.log10(2 << (bitsPerSample - 1)));
@@ -37,8 +42,8 @@ public class MusicAnalyzer implements SoundConsumer {
 		ctx = CqtContext.create()
 			.samplingFreq(sampleRate)
 			.baseFreq((2 << 3) * 65.4063913251)
-			.octaveCount(1)
-			.binsPerHalftone(1)
+			.octaveCount(2)
+			.binsPerHalftone(3)
 			.build();
 		//@formatter:on
 
@@ -46,6 +51,7 @@ public class MusicAnalyzer implements SoundConsumer {
 		octaveBinsDb = new double[ctx.getBinsPerOctave()];
 		amplitudeBuffer = new DoubleCircularBuffer(ctx.getSignalBlockSize());
 		pcDetector = new HarmonicPatternPitchClassDetector(ctx);
+		binSmoother = new ExpSmoother(ctx.getBinsPerOctave(), SMOOTHING_FACTOR);
 
 		cqt = new FastCqt(ctx);
 		cqt.init();
@@ -65,8 +71,8 @@ public class MusicAnalyzer implements SoundConsumer {
 		amplitudeBuffer.readLast(amplitudes, amplitudes.length);
 		computeAmplitudeSpectrum(amplitudes);
 		double[] pitchClassProfileDb = computePitchClassProfile();
-		PitchClassProfile pcProfile = new PitchClassProfile(pitchClassProfileDb, ctx.getHalftonesPerOctave(),
-			ctx.getBinsPerHalftone());
+		PitchClassProfile pcProfile = new PitchClassProfile(pitchClassProfileDb,
+			ctx.getHalftonesPerOctave(), ctx.getBinsPerHalftone());
 		visualizer.update(pcProfile);
 	}
 
@@ -125,10 +131,10 @@ public class MusicAnalyzer implements SoundConsumer {
 		// accumulator.add(octaveBinsDb);
 		// pitchClassProfileDb = accumulator.getAverage();
 		// } else {
-		// binSmoother.smooth(octaveBinsDb);
-		// pitchClassProfileDb = binSmoother.smooth(octaveBinsDb);
+		binSmoother.smooth(octaveBinsDb);
+		pitchClassProfileDb = binSmoother.smooth(octaveBinsDb);
 		// }
-		pitchClassProfileDb = octaveBinsDb;
+		// pitchClassProfileDb = octaveBinsDb;
 		return pitchClassProfileDb;
 	}
 }
