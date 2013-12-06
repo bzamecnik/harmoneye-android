@@ -11,6 +11,7 @@ import com.harmoneye.MusicAnalyzer;
 import com.harmoneye.PitchClassProfile;
 import com.harmoneye.SoundConsumer;
 import com.harmoneye.Visualizer;
+import com.harmoneye.android.opengl.MyGLSurfaceView;
 
 public class Capture implements Runnable {
 
@@ -35,9 +36,9 @@ public class Capture implements Runnable {
 	private short[] samples;
 	private double[] amplitudes;
 
-	public Capture(MainActivity activity) {
+	public Capture(Visualizer<PitchClassProfile> visualizer) {
 		initBuffers();
-		initComponents(activity);
+		initComponents(visualizer);
 	}
 
 	private void initBuffers() {
@@ -53,9 +54,7 @@ public class Capture implements Runnable {
 		Log.i(MainActivity.LOG_TAG, "Buffer initialized with size: " + bufferSizeInBytes + " B");
 	}
 
-	private void initComponents(MainActivity activity) {
-		Visualizer<PitchClassProfile> visualizer = new TextPitchClassVisualizer(activity);
-
+	private void initComponents(Visualizer<PitchClassProfile> visualizer) {
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
 		this.soundConsumer = new MusicAnalyzer(visualizer, AUDIO_SAMPLE_RATE, AUDIO_BITS_PER_SAMPLE);

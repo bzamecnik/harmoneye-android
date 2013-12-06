@@ -6,43 +6,31 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.TextView;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.GraphView.GraphViewData;
-import com.jjoe64.graphview.GraphViewSeries;
-import com.jjoe64.graphview.LineGraphView;
+import com.harmoneye.android.opengl.MyGLSurfaceView;
 
 public class MainActivity extends Activity {
 
 	static final String LOG_TAG = "HarmonEye";
 
 	private Capture soundCapture;
-
 	private TextView textView;
-
-//	private GraphView graphView;
-//	private GraphViewSeries graphViewSeries;
+	private MyGLSurfaceView glView;
+	private View view;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-				textView = new TextView(this);
-				setContentView(textView);
+		textView = new TextView(this);
+		glView = new MyGLSurfaceView(this);
 
-//		graphViewSeries = new GraphViewSeries(new GraphViewData[] {
-//			new GraphViewData(0, 0)
-//		});
-//
-//		graphView = new LineGraphView(this, "GraphViewDemo");
-//		graphView.addSeries(graphViewSeries);
-//		graphView.setScrollable(true);
-//		graphView.setViewPort(0, 120);
-//		graphView.setManualYAxisBounds(1.0, 0.0);
-//
-//		setContentView(graphView);
-		
+		view = textView;
+
+		setContentView(view);
+
 		toggle();
 	}
 
@@ -52,10 +40,13 @@ public class MainActivity extends Activity {
 			stop();
 		} else {
 			if (soundCapture == null) {
-				soundCapture = new Capture(this);
+				printText("Initializing...");
+				soundCapture = new Capture(new OpenGlVisualizer(glView));
+				initialized();
 			}
 			Thread thread = new Thread(soundCapture);
 			thread.start();
+
 		}
 		Log.i(LOG_TAG, soundCapture.isRunning() ? "running" : "stopped");
 	}
@@ -76,12 +67,13 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		printText("Click to toggle recording.");
+		glView.onResume();
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
+		glView.onPause();
 		Log.i(LOG_TAG, "pause");
 		stop();
 	}
@@ -109,14 +101,16 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
-//	public GraphViewSeries getGraphViewSeries() {
-//		return graphViewSeries;
-//	}
 	// prevent re-creating the activity on screen rotation
 	// http://stackoverflow.com/questions/456211/activity-restart-on-rotation-android
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		setContentView(textView);
+		setContentView(view);
+	}
+
+	private void initialized() {
+		view = glView;
+		setContentView(view);
 	}
 }
