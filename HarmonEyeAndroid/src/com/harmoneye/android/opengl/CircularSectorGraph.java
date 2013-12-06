@@ -16,12 +16,11 @@ public class CircularSectorGraph {
 	// the coordinates of the objects that use this vertex shader
 	"uniform mat4 mvpMatrix;" +
 	"attribute vec4 position;" +
-	"uniform vec4 translation;" +
 	"void main() {" +
 	// The matrix must be included as a modifier of gl_Position.
 	// Note that the mvpMatrix factor *must be first* in order
 	// for the matrix multiplication product to be correct.
-	"  gl_Position = mvpMatrix * (position - translation);" +
+	"  gl_Position = mvpMatrix * position;" +
 	"}";
 
 	private static final String fragmentShaderCode =
