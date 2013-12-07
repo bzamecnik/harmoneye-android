@@ -147,6 +147,8 @@ public class CircularSectorGraph {
 
 		float sectorCountInvDegrees = 360 * sectorCountInv;
 
+		// hack to prevent holes between adjacent triangles
+		float epsilon = 1.01f;
 		for (int i = 0; i < sectorCount; i++) {
 			float value = (float)values[i];
 
@@ -156,7 +158,7 @@ public class CircularSectorGraph {
 			Matrix.setRotateM(model, 0, angle, 0, 0, 1);
 
 			float sectorLength = TOTAL_SCALE * value;
-			float xScale = sectorLength * tanAlpha;
+			float xScale = sectorLength * tanAlpha * epsilon;
 			float yScale = sectorLength;
 			Matrix.scaleM(model, 0, xScale, yScale, 1);
 			Matrix.multiplyMM(mvp, 0, mvpMatrix, 0, model, 0);
