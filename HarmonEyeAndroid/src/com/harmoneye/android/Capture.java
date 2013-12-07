@@ -1,5 +1,7 @@
 package com.harmoneye.android;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.commons.lang3.time.StopWatch;
 
 import android.media.AudioFormat;
@@ -11,7 +13,6 @@ import com.harmoneye.MusicAnalyzer;
 import com.harmoneye.PitchClassProfile;
 import com.harmoneye.SoundConsumer;
 import com.harmoneye.Visualizer;
-import com.harmoneye.android.opengl.MyGLSurfaceView;
 
 public class Capture implements Runnable {
 
@@ -29,7 +30,7 @@ public class Capture implements Runnable {
 	private AudioRecord recorder;
 	private SoundConsumer soundConsumer;
 
-	private boolean running;
+	private AtomicBoolean running = new AtomicBoolean();
 
 	private int bufferSizeInBytes;
 	private int bufferSizeInSamples;
@@ -63,7 +64,7 @@ public class Capture implements Runnable {
 	}
 
 	public void run() {
-		running = true;
+		running.set(true);
 		try {
 			recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, AUDIO_SAMPLE_RATE, AUDIO_CHANNELS,
 				AUDIO_FORMAT, bufferSizeInBytes);
@@ -72,7 +73,7 @@ public class Capture implements Runnable {
 				return;
 			}
 			recorder.startRecording();
-			while (running) {
+			while (running.get()) {
 				// this is a blocking operation - waits until there's enough data
 				recorder.read(samples, 0, bufferSizeInSamples);
 				toAmplitudes(samples, amplitudes);
@@ -86,12 +87,12 @@ public class Capture implements Runnable {
 		}
 	}
 
-	public synchronized void stop() {
-		running = false;
+	public void stop() {
+		running.set(false);
 	}
 
-	public synchronized boolean isRunning() {
-		return running;
+	public boolean isRunning() {
+		return running.get();
 	}
 
 	private void toAmplitudes(short[] samples, double[] amplitudes) {
