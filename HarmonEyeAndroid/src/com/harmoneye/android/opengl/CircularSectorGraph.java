@@ -26,8 +26,81 @@ public class CircularSectorGraph {
 	private static final String fragmentShaderCode =
 		"precision mediump float;" +
 		"uniform float value;" +
+		// http://kristophercollins.blogspot.com/2010/08/glsl-hsb-to-rgb-function.html
+		"vec3 hsbToRgb(vec3 colorIn) {" +
+		"	float h = colorIn.x;" +
+		"	float sl = colorIn.y;" +
+		"	float l = colorIn.z;" +
+		"" +
+		"	float v;" +
+		"	float r, g, b;" +
+		"" +
+		"	r = l; // default to gray\n" +
+		"	g = l;" +
+		"	b = l;" +
+		"" +
+		"	v = (l <= 0.5) ? (l * (1.0 + sl)) : (l + sl - l * sl);" +
+		"" +
+		"	if (v > 0.0) {" +
+		"		float m;" +
+		"		float sv;" +
+		"		int sextant;" +
+		"		float frac, vsf, mid1, mid2;" +
+		"" +
+		"		m = l + l - v;" +
+		"		sv = (v - m ) / v;" +
+		"		h *= 6.0;" +
+		"		sextant = int(h);" +
+		"		frac = h - float(sextant);" +
+		"		vsf = v * sv * frac;" +
+		"		mid1 = m + vsf;" +
+		"		mid2 = v - vsf;" +
+		"" +
+		"		if (sextant==0) {" +
+		"			r = v;" +
+		"			g = mid1;" +
+		"			b = m;" +
+		"		} else if(sextant==1) {" +
+		"			r = mid2;" +
+		"			g = v;" +
+		"			b = m;" +
+		"		} else if(sextant==2) {" +
+		"			r = m;" +
+		"			g = v;" +
+		"			b = mid1;" +
+		"		} else if(sextant==3) {" +
+		"			r = m;" +
+		"			g = mid2;" +
+		"			b = v;" +
+		"		} else if(sextant==4) {" +
+		"			r = mid1;" +
+		"			g = m;" +
+		"			b = v;" +
+		"		} else if(sextant==5) {" +
+		"			r = v;" +
+		"			g = m;" +
+		"			b = mid2;" +
+		"		}" +
+		"" +
+		"	}" +
+		"" +
+		"	vec3 rgb;" +
+		"" +
+		"	rgb.r = r;" +
+		"	rgb.g = g;" +
+		"	rgb.b = b;" +
+		"" +
+		"	return rgb;" +
+		"}" +
+		"" +
+		"vec3 temperatureColor(float value) {" +
+		"	float hue = mod((1.8 - value), 1.0);" +
+		"	return hsbToRgb(vec3(hue, 0.25 + 0.75 * value, 0.25 + 0.75 * value));" +
+		"}" +
 		"void main() {" +
-		"  gl_FragColor = vec4(value, value, value, 1.0);" +
+		"  vec4 color = vec4(0.0, 0.0, 0.0, 1.0);" +
+		"  color.rgb = temperatureColor(value);" +
+		"  gl_FragColor = color;" +
 		"}";
 	//@formatter:on
 
