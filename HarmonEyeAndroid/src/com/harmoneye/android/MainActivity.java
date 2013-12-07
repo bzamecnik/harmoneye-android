@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.TextView;
 
 import com.harmoneye.android.opengl.MyGLSurfaceView;
@@ -17,7 +16,6 @@ public class MainActivity extends Activity {
 	private Capture soundCapture;
 	private TextView textView;
 	private MyGLSurfaceView glView;
-	private View view;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -26,9 +24,7 @@ public class MainActivity extends Activity {
 		textView = new TextView(this);
 		glView = new MyGLSurfaceView(this);
 
-		view = textView;
-
-		setContentView(view);
+		setContentView(textView);
 
 		toggle();
 	}
@@ -41,7 +37,7 @@ public class MainActivity extends Activity {
 			if (soundCapture == null) {
 				printText("Initializing...");
 				soundCapture = new Capture(new OpenGlVisualizer(glView));
-				initialized();
+				setContentView(glView);
 			}
 			Thread thread = new Thread(soundCapture);
 			thread.start();
@@ -66,6 +62,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Log.i(LOG_TAG, "resume");
 		glView.onResume();
 	}
 
@@ -98,10 +95,5 @@ public class MainActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
-	}
-
-	private void initialized() {
-		view = glView;
-		setContentView(view);
 	}
 }
