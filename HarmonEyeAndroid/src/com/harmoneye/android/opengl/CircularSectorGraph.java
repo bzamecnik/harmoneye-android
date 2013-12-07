@@ -95,7 +95,7 @@ public class CircularSectorGraph {
 		"" +
 		"vec3 temperatureColor(float value) {" +
 		"	float hue = mod((1.8 - value), 1.0);" +
-		"	return hsbToRgb(vec3(hue, 0.25 + 0.5 * value, 0.25 + 0.5 * value));" +
+		"	return hsbToRgb(vec3(hue, value, 0.25 + 0.5 * value));" +
 		"}" +
 		"void main() {" +
 		"  vec4 color = vec4(0.0, 0.0, 0.0, 1.0);" +

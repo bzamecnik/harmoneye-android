@@ -147,6 +147,8 @@ public class CircularGrid {
 
 		float sectorCountInvDegrees = 360 * sectorCountInv;
 
+		GLES20.glLineWidth(1.5f);
+		
 		// rays
 		for (int i = 0; i < sectorCount; i++) {
 			Matrix.setIdentityM(model, 0);
