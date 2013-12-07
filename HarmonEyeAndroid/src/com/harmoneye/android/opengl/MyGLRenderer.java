@@ -38,6 +38,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 	private static final String TAG = "MyGLRenderer";
 
+	private static final int GL_COVERAGE_BUFFER_BIT_NV = 0x8000;
+
 	private final float[] modelViewProjection = new float[16];
 	private final float[] projection = new float[16];
 	private final float[] view = new float[16];
@@ -46,6 +48,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	private Circle outerCircle;
 	private Circle innerCircle;
 	private CircularGrid circularGrid;
+
+	/** indicates whether multi-sample anti-aliasing is enabled */
+	private boolean msaaEnabled;
 
 	private boolean initialized;
 
@@ -66,7 +71,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 	@Override
 	public void onDrawFrame(GL10 unused) {
-		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+		int clearMask = GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT;
+		if (msaaEnabled) {
+			clearMask |= GL_COVERAGE_BUFFER_BIT_NV;
+		}
+		GLES20.glClear(clearMask);
 
 		if (initialized) {
 			outerCircle.draw(modelViewProjection);
@@ -151,5 +160,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 			double[] values = profile.getPitchClassBins();
 			circularSectorGraph.setValues(values);
 		}
+	}
+
+	public boolean isMsaaEnabled() {
+		return msaaEnabled;
+	}
+
+	public void setMsaaEnabled(boolean msaaEnabled) {
+		this.msaaEnabled = msaaEnabled;
 	}
 }
