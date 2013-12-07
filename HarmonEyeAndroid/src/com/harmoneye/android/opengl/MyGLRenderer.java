@@ -44,6 +44,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	private final float[] projection = new float[16];
 	private final float[] view = new float[16];
 
+
+	private boolean initialized;
+
 	@Override
 	public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 		GLES20.glClearColor(0.05f, 0.25f, 0.05f, 1.0f);
@@ -58,13 +61,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 //			values[i] = Math.abs(Math.cos(4 * 2 * Math.PI * i / (double) sectorCount));
 //		}
 //		circularSectorGraph.setValues(values);
+		initialized = true;
 	}
 
 	@Override
 	public void onDrawFrame(GL10 unused) {
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-		circularSectorGraph.draw(modelViewProjection);
+		if (initialized) {
+			circularSectorGraph.draw(modelViewProjection);
+		}
 	}
 
 	@Override
@@ -138,7 +144,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	}
 
 	public void setValue(PitchClassProfile profile) {
-		double[] values = profile.getPitchClassBins();
-		circularSectorGraph.setValues(values);
+		if (initialized) {
+			double[] values = profile.getPitchClassBins();
+			circularSectorGraph.setValues(values);
+		}
 	}
 }
