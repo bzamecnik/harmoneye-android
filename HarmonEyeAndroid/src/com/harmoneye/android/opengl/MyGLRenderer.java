@@ -40,6 +40,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 	private static final int GL_COVERAGE_BUFFER_BIT_NV = 0x8000;
 
+	private static final float OUTER_CIRCLE_SCALE = 0.9f;
+	private static final float INNER_CIRCLE_SCALE = 0.1f;
+
 	private final float[] modelViewProjection = new float[16];
 	private final float[] projection = new float[16];
 	private final float[] view = new float[16];
@@ -60,12 +63,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 
-		circularSectorGraph = new CircularSectorGraph();
+		circularSectorGraph = new CircularSectorGraph(OUTER_CIRCLE_SCALE);
 		float[] lightGrey = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
 		float[] darkGrey = new float[] { 0.25f, 0.25f, 0.25f, 1.0f };
-		outerCircle = new Circle(100, 0.9f, null, lightGrey);
-		innerCircle = new Circle(30, 0.1f, darkGrey, lightGrey);
-		circularGrid = new CircularGrid(12, 0.9f, lightGrey);
+		outerCircle = new Circle(100, OUTER_CIRCLE_SCALE, null, lightGrey);
+		innerCircle = new Circle(30, INNER_CIRCLE_SCALE, darkGrey, lightGrey);
+		circularGrid = new CircularGrid(12, OUTER_CIRCLE_SCALE, lightGrey);
 		initialized = true;
 	}
 

@@ -107,9 +107,6 @@ public class CircularSectorGraph {
 	private static final int BYTES_PER_FLOAT = 4;
 	private static final int BYTES_PER_SHORT = 2;
 
-	// overall scale of the graph
-	final static float TOTAL_SCALE = 0.9f;
-
 	private final FloatBuffer vertexBuffer;
 	private final ShortBuffer drawListBuffer;
 	private final int program;
@@ -131,6 +128,9 @@ public class CircularSectorGraph {
 	// 4 bytes per vertex
 	private final int vertexStride = COORDS_PER_VERTEX * 4;
 
+	// overall scale of the graph
+	private float scale;
+
 	// number of circular sectors
 	private int sectorCount;
 	// 1 / sectorCount
@@ -143,7 +143,9 @@ public class CircularSectorGraph {
 	/**
 	 * Sets up the drawing object data for use in an OpenGL ES context.
 	 */
-	public CircularSectorGraph() {
+	public CircularSectorGraph(float scale) {
+		this.scale = scale;
+
 		vertexBuffer = initVertexBuffer();
 		drawListBuffer = initDrawListBuffer();
 		program = initShaderProgram();
@@ -223,14 +225,14 @@ public class CircularSectorGraph {
 		// hack to prevent holes between adjacent triangles
 		float epsilon = 1.01f;
 		for (int i = 0; i < sectorCount; i++) {
-			float value = (float)values[i];
+			float value = (float) values[i];
 
 			Matrix.setIdentityM(model, 0);
 
 			float angle = i * sectorCountInvDegrees;
 			Matrix.setRotateM(model, 0, angle, 0, 0, 1);
 
-			float sectorLength = TOTAL_SCALE * value;
+			float sectorLength = scale * value;
 			float xScale = sectorLength * tanAlpha * epsilon;
 			float yScale = sectorLength;
 			Matrix.scaleM(model, 0, xScale, yScale, 1);
