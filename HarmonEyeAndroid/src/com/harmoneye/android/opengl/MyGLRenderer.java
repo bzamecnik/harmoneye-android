@@ -18,12 +18,12 @@ package com.harmoneye.android.opengl;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import com.harmoneye.PitchClassProfile;
-
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
+
+import com.harmoneye.PitchClassProfile;
 
 /**
  * Provides drawing instructions for a GLSurfaceView object. This class must
@@ -38,29 +38,29 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 	private static final String TAG = "MyGLRenderer";
 
-	private CircularSectorGraph circularSectorGraph;
-
 	private final float[] modelViewProjection = new float[16];
 	private final float[] projection = new float[16];
 	private final float[] view = new float[16];
 
+	private CircularSectorGraph circularSectorGraph;
+	private Circle outerCircle;
+	private Circle innerCircle;
+	private CircularGrid circularGrid;
 
 	private boolean initialized;
 
 	@Override
 	public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-		GLES20.glClearColor(0.05f, 0.25f, 0.05f, 1.0f);
+		GLES20.glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 
 		circularSectorGraph = new CircularSectorGraph();
-//		int sectorCount = 10 * 12;
-//		double values[] = new double[sectorCount];
-//		for (int i = 0; i < sectorCount; i++) {
-//			// values[i] = (i + 1) / (float) (sectorCount + 1);
-//			values[i] = Math.abs(Math.cos(4 * 2 * Math.PI * i / (double) sectorCount));
-//		}
-//		circularSectorGraph.setValues(values);
+		float[] lightGrey = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
+		float[] darkGrey = new float[] { 0.25f, 0.25f, 0.25f, 1.0f };
+		outerCircle = new Circle(100, 0.9f, null, lightGrey);
+		innerCircle = new Circle(30, 0.1f, darkGrey, lightGrey);
+		circularGrid = new CircularGrid(12, 0.9f, lightGrey);
 		initialized = true;
 	}
 
@@ -69,7 +69,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
 		if (initialized) {
+			outerCircle.draw(modelViewProjection);
+			circularGrid.draw(modelViewProjection);
 			circularSectorGraph.draw(modelViewProjection);
+			innerCircle.draw(modelViewProjection);
 		}
 	}
 
