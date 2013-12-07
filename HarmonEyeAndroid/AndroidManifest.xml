@@ -18,10 +18,15 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        <!-- 
+		prevent re-creating the activity on screen rotation
+		(http://stackoverflow.com/questions/456211/activity-restart-on-rotation-android) 
+		android:configChanges="orientation|screenSize"
+		-->
         <activity
             android:name="com.harmoneye.android.MainActivity"
             android:label="@string/app_name"
-            android:configChanges="orientation">
+            android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

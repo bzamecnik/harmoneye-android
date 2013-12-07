@@ -1,7 +1,6 @@
 package com.harmoneye.android;
 
 import android.app.Activity;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -99,14 +98,6 @@ public class MainActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
-	}
-
-	// prevent re-creating the activity on screen rotation
-	// http://stackoverflow.com/questions/456211/activity-restart-on-rotation-android
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
-		setContentView(view);
 	}
 
 	private void initialized() {
