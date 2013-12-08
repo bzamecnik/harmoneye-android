@@ -1,5 +1,7 @@
 package com.harmoneye;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.util.FastMath;
 
@@ -29,7 +31,7 @@ public class MusicAnalyzer implements SoundConsumer {
 	private double dbThreshold;
 	private double dbThresholdInv;
 
-	private boolean initialized;
+	private AtomicBoolean initialized = new AtomicBoolean();
 
 	public MusicAnalyzer(Visualizer<PitchClassProfile> visualizer,
 		int sampleRate, int bitsPerSample) {
@@ -55,7 +57,7 @@ public class MusicAnalyzer implements SoundConsumer {
 
 		cqt = new FastCqt(ctx);
 		cqt.init();
-		initialized = true;
+		initialized.set(true);
 	}
 
 	@Override
@@ -65,7 +67,7 @@ public class MusicAnalyzer implements SoundConsumer {
 	}
 
 	public void updateSignal() {
-		if (!initialized) {
+		if (!initialized.get()) {
 			return;
 		}
 		amplitudeBuffer.readLast(amplitudes, amplitudes.length);
