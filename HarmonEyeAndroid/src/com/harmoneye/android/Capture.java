@@ -19,7 +19,7 @@ public class Capture implements Runnable {
 	// TODO: figure out the sample rate and other format information
 	// automatically as it might vary over devices
 
-	private static final int AUDIO_SAMPLE_RATE = 22050;
+	private static final int AUDIO_SAMPLE_RATE = 11025;
 	private static final int AUDIO_BYTES_PER_SAMPLE = 2;
 	private static final int AUDIO_BITS_PER_SAMPLE = 8 * AUDIO_BYTES_PER_SAMPLE;
 	private static final int AUDIO_CHANNELS = AudioFormat.CHANNEL_IN_MONO;

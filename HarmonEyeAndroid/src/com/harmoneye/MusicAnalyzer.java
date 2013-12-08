@@ -43,9 +43,9 @@ public class MusicAnalyzer implements SoundConsumer {
 		//@formatter:off
 		ctx = CqtContext.create()
 			.samplingFreq(sampleRate)
-			.baseFreq((2 << 3) * 65.4063913251)
+			.baseFreq((2 << 2) * 65.4063913251)
 			.octaveCount(2)
-			.binsPerHalftone(3)
+			.binsPerHalftone(5)
 			.build();
 		//@formatter:on
 
