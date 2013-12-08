@@ -160,8 +160,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 	public void setValue(PitchClassProfile profile) {
 		if (initialized) {
-			double[] values = profile.getPitchClassBins();
-			circularSectorGraph.setValues(values);
+			circularSectorGraph.setValue(profile);
 		}
 	}
 

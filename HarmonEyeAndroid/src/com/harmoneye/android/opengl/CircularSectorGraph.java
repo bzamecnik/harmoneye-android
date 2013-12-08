@@ -5,6 +5,8 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+import com.harmoneye.PitchClassProfile;
+
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
@@ -139,6 +141,12 @@ public class CircularSectorGraph {
 	private float tanAlpha;
 
 	private double values[];
+	
+	private int binsPerHalftone;
+	private int halftoneCount;
+
+	// eg. 1 for straight diagram, 7 for circle of fifths
+	private int pitchStep = 1;
 
 	/**
 	 * Sets up the drawing object data for use in an OpenGL ES context.
@@ -150,7 +158,7 @@ public class CircularSectorGraph {
 		drawListBuffer = initDrawListBuffer();
 		program = initShaderProgram();
 
-		setValues(new double[1]);
+		setValue(new PitchClassProfile(new double[1], 12, 1));
 	}
 
 	/** initialize vertex byte buffer for shape coordinates */
@@ -224,12 +232,17 @@ public class CircularSectorGraph {
 
 		// hack to prevent holes between adjacent triangles
 		float epsilon = 1.01f;
+		int halfBinsPerHalftone = binsPerHalftone / 2;
 		for (int i = 0; i < sectorCount; i++) {
-			float value = (float) values[i];
+			int pitchClass = i / binsPerHalftone;
+			int binInPitchClass = i % binsPerHalftone;
+			int movedPitchClass = (pitchClass * pitchStep) % halftoneCount;
+			int index = movedPitchClass * binsPerHalftone + binInPitchClass;
+			float value = (float) values[index];
 
 			Matrix.setIdentityM(model, 0);
 
-			float angle = i * sectorCountInvDegrees;
+			float angle = (i - halfBinsPerHalftone) * sectorCountInvDegrees;
 			Matrix.setRotateM(model, 0, angle, 0, 0, 1);
 
 			float sectorLength = scale * value;
@@ -254,10 +267,18 @@ public class CircularSectorGraph {
 		GLES20.glDisableVertexAttribArray(positionHandle);
 	}
 
-	public void setValues(double values[]) {
-		this.values = values;
-		this.sectorCount = values.length;
-		this.sectorCountInv = 1.0f / sectorCount;
-		this.tanAlpha = (float) Math.tan(Math.PI * sectorCountInv);
+	public void setValue(PitchClassProfile profile) {
+		this.values = profile.getPitchClassBins();
+		
+		binsPerHalftone = profile.getBinsPerHalftone();
+		halftoneCount = profile.getHalftoneCount();
+		
+		sectorCount = values.length;
+		sectorCountInv = 1.0f / sectorCount;
+		tanAlpha = (float) Math.tan(Math.PI * sectorCountInv);
+	}
+	
+	public void setPitchStep(int pitchStep) {
+		this.pitchStep = pitchStep;
 	}
 }
