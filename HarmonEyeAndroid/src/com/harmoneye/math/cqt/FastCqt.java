@@ -50,7 +50,7 @@ public class FastCqt implements Cqt {
 
 		spectralKernels.operate(spectrum, transformedSignal);
 
-		Complex normalizationFactor = ctx.getNormalizationFactor();
+		double normalizationFactor = ctx.getNormalizationFactor();
 		for (int i = 0; i < transformedSignal.length; i++) {
 			transformedSignal[i] = transformedSignal[i].multiply(normalizationFactor);
 		}
