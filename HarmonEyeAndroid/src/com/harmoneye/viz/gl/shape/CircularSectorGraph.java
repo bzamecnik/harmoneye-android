@@ -5,11 +5,12 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-import com.harmoneye.analysis.PitchClassProfile;
-import com.harmoneye.viz.gl.MyGLRenderer;
-
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+
+import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.math.cqt.CqtContext;
+import com.harmoneye.viz.gl.MyGLRenderer;
 
 public class CircularSectorGraph {
 
@@ -141,8 +142,10 @@ public class CircularSectorGraph {
 	// tangent of the half-angle of the sector near the circle center
 	private float tanAlpha;
 
+	private AnalyzedFrame frame;
+
 	private double values[];
-	
+
 	private int binsPerHalftone;
 	private int halftoneCount;
 
@@ -159,12 +162,13 @@ public class CircularSectorGraph {
 		drawListBuffer = initDrawListBuffer();
 		program = initShaderProgram();
 
-		setValue(new PitchClassProfile(new double[1], 12, 1));
+		setValue(null);
 	}
 
 	/** initialize vertex byte buffer for shape coordinates */
 	private FloatBuffer initVertexBuffer() {
-		ByteBuffer b = ByteBuffer.allocateDirect(coords.length * BYTES_PER_FLOAT);
+		ByteBuffer b = ByteBuffer.allocateDirect(coords.length
+			* BYTES_PER_FLOAT);
 		b.order(ByteOrder.nativeOrder());
 		FloatBuffer vertexBuffer = b.asFloatBuffer();
 		vertexBuffer.put(coords);
@@ -174,7 +178,8 @@ public class CircularSectorGraph {
 
 	/** initialize byte buffer for the draw list */
 	private ShortBuffer initDrawListBuffer() {
-		ByteBuffer b = ByteBuffer.allocateDirect(drawOrder.length * BYTES_PER_SHORT);
+		ByteBuffer b = ByteBuffer.allocateDirect(drawOrder.length
+			* BYTES_PER_SHORT);
 		b.order(ByteOrder.nativeOrder());
 		ShortBuffer drawListBuffer = b.asShortBuffer();
 		drawListBuffer.put(drawOrder);
@@ -184,11 +189,9 @@ public class CircularSectorGraph {
 
 	/** prepare shaders and OpenGL program */
 	private int initShaderProgram() {
-		int vertexShader = MyGLRenderer.loadShader(
-			GLES20.GL_VERTEX_SHADER,
+		int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER,
 			vertexShaderCode);
-		int fragmentShader = MyGLRenderer.loadShader(
-			GLES20.GL_FRAGMENT_SHADER,
+		int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER,
 			fragmentShaderCode);
 
 		int program = GLES20.glCreateProgram();
@@ -201,17 +204,20 @@ public class CircularSectorGraph {
 	/**
 	 * Encapsulates the OpenGL ES instructions for drawing this shape.
 	 * 
-	 * @param mvpMatrix
-	 *          - The Model View Project matrix in which to draw this shape.
+	 * @param mvpMatrix - The Model View Project matrix in which to draw this
+	 * shape.
 	 */
 	public void draw(float[] mvpMatrix) {
+		if (frame == null) {
+			return;
+		}
+
 		GLES20.glUseProgram(program);
 
 		// vertex position
 		int positionHandle = GLES20.glGetAttribLocation(program, "position");
 		GLES20.glEnableVertexAttribArray(positionHandle);
-		GLES20.glVertexAttribPointer(
-			positionHandle,
+		GLES20.glVertexAttribPointer(positionHandle,
 			COORDS_PER_VERTEX,
 			GLES20.GL_FLOAT,
 			false,
@@ -258,8 +264,7 @@ public class CircularSectorGraph {
 			GLES20.glUniform1f(valueHandle, value);
 			MyGLRenderer.checkGlError("glUniform1f");
 
-			GLES20.glDrawElements(
-				GLES20.GL_TRIANGLES,
+			GLES20.glDrawElements(GLES20.GL_TRIANGLES,
 				drawOrder.length,
 				GLES20.GL_UNSIGNED_SHORT,
 				drawListBuffer);
@@ -268,17 +273,21 @@ public class CircularSectorGraph {
 		GLES20.glDisableVertexAttribArray(positionHandle);
 	}
 
-	public void setValue(PitchClassProfile profile) {
-		this.values = profile.getPitchClassBins();
-		
-		binsPerHalftone = profile.getBinsPerHalftone();
-		halftoneCount = profile.getHalftoneCount();
-		
-		sectorCount = values.length;
-		sectorCountInv = 1.0f / sectorCount;
-		tanAlpha = (float) Math.tan(Math.PI * sectorCountInv);
+	public void setValue(AnalyzedFrame frame) {
+		this.frame = frame;
+
+		if (frame != null) {
+			CqtContext ctx = frame.getCtxContext();
+			binsPerHalftone = ctx.getBinsPerHalftone();
+			halftoneCount = ctx.getHalftonesPerOctave();
+
+			values = frame.getOctaveBins();
+			sectorCount = values.length;
+			sectorCountInv = 1.0f / sectorCount;
+			tanAlpha = (float) Math.tan(Math.PI * sectorCountInv);
+		}
 	}
-	
+
 	public void setPitchStep(int pitchStep) {
 		this.pitchStep = pitchStep;
 	}

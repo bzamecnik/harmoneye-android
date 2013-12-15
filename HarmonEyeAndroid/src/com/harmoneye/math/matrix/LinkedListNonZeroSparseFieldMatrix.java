@@ -1,4 +1,4 @@
-package com.harmoneye.matrix;
+package com.harmoneye.math.matrix;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -131,9 +131,9 @@ public final class LinkedListNonZeroSparseFieldMatrix<T extends FieldElement<T>>
 		StringBuilder sb = new StringBuilder();
 		sb.append("LinkedListNonZeroSparseFieldMatrix[");
 		sb.append("rows=").append(rowCount);
-		sb.append(", columns=").append(rowCount);
-		sb.append(", nonZeroEntryCount=").append(nonzeroEntryCount).append("\n");
-		sb.append("entries=[\n");
+		sb.append(", columns=").append(columnCount);
+		sb.append(", nonZeroEntryCount=").append(nonzeroEntryCount);
+//		sb.append("\nentries=[\n");
 //		for (List<SparseEntry<T>> columns : rows) {
 //			sb.append("[");
 //			for (SparseEntry<T> entry : columns) {
@@ -142,7 +142,7 @@ public final class LinkedListNonZeroSparseFieldMatrix<T extends FieldElement<T>>
 //			sb.append("]");
 //			sb.append("\n");
 //		}
-		sb.append("]\n");
+//		sb.append("]\n");
 		sb.append("]");
 		return sb.toString();
 	}

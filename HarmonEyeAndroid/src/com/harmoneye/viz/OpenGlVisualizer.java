@@ -1,9 +1,9 @@
 package com.harmoneye.viz;
 
-import com.harmoneye.analysis.PitchClassProfile;
+import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.viz.gl.MyGLSurfaceView;
 
-public class OpenGlVisualizer implements Visualizer<PitchClassProfile> {
+public class OpenGlVisualizer implements Visualizer<AnalyzedFrame> {
 
 	private MyGLSurfaceView view;
 
@@ -12,7 +12,7 @@ public class OpenGlVisualizer implements Visualizer<PitchClassProfile> {
 	}
 
 	@Override
-	public void update(PitchClassProfile profile) {
+	public void update(AnalyzedFrame profile) {
 		view.setValue(profile);
 	}
 

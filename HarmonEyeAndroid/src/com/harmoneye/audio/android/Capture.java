@@ -10,8 +10,8 @@ import android.media.MediaRecorder;
 import android.util.Log;
 
 import com.harmoneye.HarmonEyeActivity;
+import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.analysis.MusicAnalyzer;
-import com.harmoneye.analysis.PitchClassProfile;
 import com.harmoneye.analysis.SoundConsumer;
 import com.harmoneye.viz.Visualizer;
 
@@ -38,7 +38,7 @@ public class Capture implements Runnable {
 	private short[] samples;
 	private double[] amplitudes;
 
-	public Capture(Visualizer<PitchClassProfile> visualizer) {
+	public Capture(Visualizer<AnalyzedFrame> visualizer) {
 		initBuffers();
 		initComponents(visualizer);
 	}
@@ -56,7 +56,7 @@ public class Capture implements Runnable {
 		Log.i(HarmonEyeActivity.LOG_TAG, "Buffer initialized with size: " + bufferSizeInBytes + " B");
 	}
 
-	private void initComponents(Visualizer<PitchClassProfile> visualizer) {
+	private void initComponents(Visualizer<AnalyzedFrame> visualizer) {
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
 		this.soundConsumer = new MusicAnalyzer(visualizer, AUDIO_SAMPLE_RATE, AUDIO_BITS_PER_SAMPLE);

@@ -1,5 +1,7 @@
 package com.harmoneye.math.cqt;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.analysis.integration.TrapezoidIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.complex.Complex;
@@ -21,18 +23,18 @@ public class CqtCalculator {
 		this.ctx = ctx;
 	}
 
-	public double centerFreq(int k) {
+	public double centerFreq(int binIndex) {
 		// (k - binsPerHalftoneHalf) instead of k
 		// in order to put the center frequency in the center bin for that halftone
-		return (ctx.getBaseFreq() * FastMath.pow(2, (k - ctx.getBinsPerHalftone() / 2) * ctx.getBinsPerOctaveInv()));
+		return (ctx.getBaseFreq() * FastMath.pow(2, (binIndex - ctx.getBinsPerHalftone() / 2) * ctx.getBinsPerOctaveInv()));
 	}
 
-	public int bandWidth(int k) {
-		return (int) FastMath.ceil(ctx.getQ() * ctx.getSamplingFreq() / centerFreq(k));
+	public int bandWidth(int binIndex) {
+		return (int) FastMath.ceil(ctx.getQ() * ctx.getSamplingFreq() / centerFreq(binIndex));
 	}
 
-	protected Complex[] temporalKernel(int k) {
-		int size = bandWidth(k);
+	protected Complex[] temporalKernel(int kernelBinIndex) {
+		int size = bandWidth(kernelBinIndex + ctx.getFirstKernelBin());
 		Complex[] coeffs = new Complex[size];
 		double sizeInv = 1.0 / size;
 		double factor = 2 * FastMath.PI * ctx.getQ() * sizeInv;
@@ -88,10 +90,7 @@ public class CqtCalculator {
 		int dataSize = FastMath.min(values.length, totalSize);
 		int paddingSize = totalSize - dataSize;
 
-		for (int i = 0; i < paddingSize; i++) {
-			padded[i] = Complex.ZERO;
-		}
-
+		Arrays.fill(padded, 0, paddingSize, Complex.ZERO);
 		System.arraycopy(values, 0, padded, paddingSize, dataSize);
 
 		return padded;
@@ -101,10 +100,7 @@ public class CqtCalculator {
 		int dataSize = FastMath.min(in.length, padded.length);
 
 		System.arraycopy(in, 0, padded, 0, dataSize);
-
-		for (int i = dataSize; i < padded.length; i++) {
-			padded[i] = 0;
-		}
+		Arrays.fill(padded, dataSize, padded.length, 0);
 	}
 
 	@Deprecated

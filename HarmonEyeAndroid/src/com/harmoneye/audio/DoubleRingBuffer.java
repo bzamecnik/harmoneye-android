@@ -21,23 +21,24 @@ public class DoubleRingBuffer {
 	 * 
 	 * Older data get overwritten.
 	 * 
-	 * @param data
+	 * @param samples
 	 */
-	public void write(double[] data) {
-		for (int i = 0; i < data.length; i++) {
-			buffer[endIndex] = data[i];
-			endIndex = incrementIndex(endIndex, 1);
+	public void write(double[] samples) {
+		int index = endIndex;
+		endIndex = incrementIndex(endIndex, samples.length);
+		for (int i = 0; i < samples.length; i++) {
+			buffer[index] = samples[i];
+			index = incrementIndex(index, 1);
 		}
 	}
 
 	/**
 	 * Reads last {@code length} elements appended to the buffer (from the end)
 	 * into the provided {@code result} array.
-	 * 
-	 * @param result
 	 * @param length can be lower or equal to result.length
+	 * @param result
 	 */
-	public void readLast(double[] result, int length) {
+	public void readLast(int length, double[] result) {
 		int index = incrementIndex(endIndex, -length);
 		for (int i = 0; i < length; i++) {
 			result[i] = buffer[index];

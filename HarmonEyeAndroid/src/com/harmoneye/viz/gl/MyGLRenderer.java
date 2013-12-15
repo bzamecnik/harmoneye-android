@@ -23,7 +23,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import com.harmoneye.analysis.PitchClassProfile;
+import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.viz.gl.shape.Circle;
 import com.harmoneye.viz.gl.shape.CircularGrid;
 import com.harmoneye.viz.gl.shape.CircularSectorGraph;
@@ -161,9 +161,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		}
 	}
 
-	public void setValue(PitchClassProfile profile) {
+	public void setValue(AnalyzedFrame frame) {
 		if (initialized) {
-			circularSectorGraph.setValue(profile);
+			circularSectorGraph.setValue(frame);
 		}
 	}
 

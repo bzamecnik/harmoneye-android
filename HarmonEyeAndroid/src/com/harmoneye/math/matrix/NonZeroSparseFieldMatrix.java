@@ -1,4 +1,4 @@
-package com.harmoneye.matrix;
+package com.harmoneye.math.matrix;
 
 import org.apache.commons.math3.Field;
 import org.apache.commons.math3.FieldElement;

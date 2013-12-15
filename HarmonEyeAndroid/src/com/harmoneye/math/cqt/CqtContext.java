@@ -6,18 +6,21 @@ import com.harmoneye.math.window.HammingWindow;
 import com.harmoneye.math.window.WindowFunction;
 
 public final class CqtContext {
-	private int octaveCount = 6;
-	private double baseFreq = 65.4063913251;
+	private int octaves = 6;
+	private Integer kernelOctaves;
+	private double maxFreq = 4186.0090448064;
 	private double samplingFreq = 22050;
 	private int halftonesPerOctave = 12;
 	private int binsPerHalftone = 5;
 	private WindowFunction window = new HammingWindow();
 	private double chopThreshold = 0.005;
 
-	private double maxFreq;
+	private double baseFreq;
 	private int binsPerOctave;
 	private double binsPerOctaveInv;
 	private int totalBins;
+	private int kernelBins;
+	private int firstKernelBin;
 	private double q;
 	private double windowIntegral;
 	private int signalBlockSize;
@@ -32,31 +35,46 @@ public final class CqtContext {
 
 	private void update() {
 		CqtCalculator calc = new CqtCalculator(this);
-		maxFreq = FastMath.pow(2, octaveCount) * baseFreq;
+		if (kernelOctaves == null) {
+			kernelOctaves = octaves;
+		}
+		baseFreq = FastMath.pow(2, -octaves) * maxFreq;
 		binsPerOctave = halftonesPerOctave * binsPerHalftone;
 		binsPerOctaveInv = 1.0 / binsPerOctave;
-		totalBins = (int) FastMath.ceil(binsPerOctave * FastMath.log(2, maxFreq / baseFreq));
+		totalBins = binsPerOctave * octaves;
+		kernelBins = binsPerOctave * kernelOctaves;
+		firstKernelBin = totalBins - kernelBins;
 		q = 1 / (FastMath.pow(2, binsPerOctaveInv) - 1);
 		windowIntegral = calc.windowIntegral(window);
 
-		signalBlockSize = calc.nextPowerOf2(calc.bandWidth(0));
+		signalBlockSize = calc.nextPowerOf2(calc.bandWidth(firstKernelBin));
 		normalizationFactor = 2 / (signalBlockSize * windowIntegral);
+
+		System.out.println(this);
 	}
 
-	public int getOctaveCount() {
-		return octaveCount;
+	public int getOctaves() {
+		return octaves;
 	}
 
-	public void setOctaveCount(int octaveCount) {
-		this.octaveCount = octaveCount;
+	public void setOctaves(int octaves) {
+		this.octaves = octaves;
+	}
+
+	public int getKernelOctaves() {
+		return kernelOctaves;
+	}
+
+	public void setKernelOctaves(int kernelOctaves) {
+		this.kernelOctaves = kernelOctaves;
 	}
 
 	public double getBaseFreq() {
 		return baseFreq;
 	}
 
-	public void setBaseFreq(double baseFreq) {
-		this.baseFreq = baseFreq;
+	public void setMaxFreq(double maxFreq) {
+		this.maxFreq = maxFreq;
 	}
 
 	public double getSamplingFreq() {
@@ -115,6 +133,14 @@ public final class CqtContext {
 		return totalBins;
 	}
 
+	public int getKernelBins() {
+		return kernelBins;
+	}
+
+	public int getFirstKernelBin() {
+		return firstKernelBin;
+	}
+
 	public double getQ() {
 		return q;
 	}
@@ -123,13 +149,26 @@ public final class CqtContext {
 		return windowIntegral;
 	}
 
-	/** number of samples per signal block */
 	public int getSignalBlockSize() {
 		return signalBlockSize;
 	}
 
 	public double getNormalizationFactor() {
 		return normalizationFactor;
+	}
+
+	@Override
+	public String toString() {
+		return "CqtContext [octaves=" + octaves + ", kernelOctaves="
+			+ kernelOctaves + ", maxFreq=" + maxFreq + ", samplingFreq="
+			+ samplingFreq + ", halftonesPerOctave=" + halftonesPerOctave
+			+ ", binsPerHalftone=" + binsPerHalftone + ", window=" + window
+			+ ", chopThreshold=" + chopThreshold + ", baseFreq=" + baseFreq
+			+ ", binsPerOctave=" + binsPerOctave + ", binsPerOctaveInv="
+			+ binsPerOctaveInv + ", totalBins=" + totalBins + ", kernelBins="
+			+ kernelBins + ", firstKernelBin=" + firstKernelBin + ", q=" + q
+			+ ", windowIntegral=" + windowIntegral + ", signalBlockSize="
+			+ signalBlockSize + ", normalizationFactor=" + normalizationFactor + "]";
 	}
 
 	public static class Builder {
@@ -141,13 +180,18 @@ public final class CqtContext {
 			return ctx;
 		}
 
-		public Builder octaveCount(int octaveCount) {
-			ctx.setOctaveCount(octaveCount);
+		public Builder octaves(int octaves) {
+			ctx.setOctaves(octaves);
 			return this;
 		}
 
-		public Builder baseFreq(double baseFreq) {
-			ctx.setBaseFreq(baseFreq);
+		public Builder kernelOctaves(int kernelOctaves) {
+			ctx.setKernelOctaves(kernelOctaves);
+			return this;
+		}
+
+		public Builder maxFreq(double maxFreq) {
+			ctx.setMaxFreq(maxFreq);
 			return this;
 		}
 

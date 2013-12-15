@@ -3,7 +3,7 @@ package com.harmoneye.viz.gl;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 
-import com.harmoneye.analysis.PitchClassProfile;
+import com.harmoneye.analysis.AnalyzedFrame;
 
 /**
  * A view container where OpenGL ES graphics can be drawn on screen. This view
@@ -33,8 +33,8 @@ public class MyGLSurfaceView extends GLSurfaceView {
 		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 	}
 
-	public void setValue(PitchClassProfile profile) {
-		renderer.setValue(profile);
+	public void setValue(AnalyzedFrame frame) {
+		renderer.setValue(frame);
 		requestRender();
 	}
 }
