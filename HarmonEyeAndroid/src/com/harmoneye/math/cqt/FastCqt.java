@@ -10,6 +10,7 @@ import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 
+import com.harmoneye.analysis.ScalarExpSmoother;
 import com.harmoneye.math.matrix.InPlaceFieldMatrix;
 import com.harmoneye.math.matrix.LinkedListNonZeroSparseFieldMatrix;
 import com.harmoneye.math.matrix.NonZeroSparseFieldMatrix;
@@ -27,6 +28,8 @@ public class FastCqt implements Cqt {
 	// allocated result
 	private Complex[] dftSpectrum;
 
+	//ScalarExpSmoother acc = new ScalarExpSmoother(0.01);
+	
 	public FastCqt(CqtContext ctx) {
 		this.ctx = ctx;
 		this.calc = new CqtCalculator(ctx);
@@ -44,8 +47,8 @@ public class FastCqt implements Cqt {
 
 	@Override
 	public Complex[] transform(double[] signal) {
-		// StopWatch sw = new StopWatch();
-		// sw.start();
+//		 StopWatch sw = new StopWatch();
+//		 sw.start();
 
 		// Use only the real part of the signal.
 		// Right padding for real-time usage - minimal latency.
@@ -66,8 +69,8 @@ public class FastCqt implements Cqt {
 			cqtSpectrum[i] = cqtSpectrum[i].multiply(normalizationFactor);
 		}
 
-		// sw.stop();
-		// System.out.println("Computed transformed signal in " +sw.getNanoTime() * 0.001 + " us");
+//		 sw.stop();
+//		 System.out.println("Computed transformed signal in " + acc.smooth(sw.getNanoTime()) * 0.001 + " us");
 
 		return cqtSpectrum;
 	}

@@ -38,7 +38,7 @@ public class MusicAnalyzer implements SoundConsumer {
 	private static final boolean BIN_SMOOTHER_ENABLED = true;
 	private AtomicBoolean updating = new AtomicBoolean();
 	
-//	ScalarMovingAverageAccumulator acc = new ScalarMovingAverageAccumulator();
+//	ScalarExpSmoother acc = new ScalarExpSmoother(0.01);
 
 	public MusicAnalyzer(Visualizer<AnalyzedFrame> visualizer,
 		int sampleRate, int bitsPerSample) {
@@ -89,9 +89,8 @@ public class MusicAnalyzer implements SoundConsumer {
 		visualizer.update(frame);
 
 //		sw.stop();
-//		acc.add(sw.getTime());
-		
-		//Log.d(HarmonEyeActivity.LOG_TAG, "updateSingal() in " + acc.getAverage() + " ms");
+
+//		Log.d(HarmonEyeActivity.LOG_TAG, "updateSingal() in " + acc.smooth(sw.getTime()) + " ms");
 		updating.set(false);
 	}
 
