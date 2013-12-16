@@ -64,10 +64,10 @@ public class FastCqt implements Cqt {
 		// precomputed matrix of kernels (in frequency domain).
 		spectralKernels.operate(dftSpectrum, cqtSpectrum);
 
-		double normalizationFactor = ctx.getNormalizationFactor();
-		for (int i = 0; i < cqtSpectrum.length; i++) {
-			cqtSpectrum[i] = cqtSpectrum[i].multiply(normalizationFactor);
-		}
+//		double normalizationFactor = ctx.getNormalizationFactor();
+//		for (int i = 0; i < cqtSpectrum.length; i++) {
+//			cqtSpectrum[i] = cqtSpectrum[i].multiply(normalizationFactor);
+//		}
 
 //		 sw.stop();
 //		 System.out.println("Computed transformed signal in " + acc.smooth(sw.getNanoTime()) * 0.001 + " us");
@@ -89,7 +89,8 @@ public class FastCqt implements Cqt {
 		NonZeroSparseFieldMatrix<Complex> kernels = new NonZeroSparseFieldMatrix<Complex>(
 				field, rows, columns);
 		for (int k = 0; k < rows; k++) {
-			kernels.setRow(k, calc.conjugate(calc.spectralKernel(k)));
+			//kernels.setRow(k, calc.conjugate(calc.spectralKernel(k)));
+			kernels.setRow(k, calc.conjugatedNormalizedspectralKernel(k));
 		}
 		kernels.transpose();
 		spectralKernels = new LinkedListNonZeroSparseFieldMatrix<Complex>(kernels);

@@ -53,6 +53,20 @@ public class CqtCalculator {
 		return spectrum;
 	}
 
+	public Complex[] conjugatedNormalizedspectralKernel(int k) {
+		Complex[] spectrum = spectralKernel(k);
+		double normalizationFactor = ctx.getNormalizationFactor();
+
+		for (int i = 0; i < spectrum.length; i++) {
+			Complex value = spectrum[i];
+			if (value != Complex.ZERO) {
+				spectrum[i] = value.conjugate().multiply(normalizationFactor);
+			}
+		}
+
+		return spectrum;
+	}
+
 	public double windowIntegral(WindowFunction window) {
 		UnivariateIntegrator integrator = new TrapezoidIntegrator();
 		return integrator.integrate(100, window, 0, 1);
