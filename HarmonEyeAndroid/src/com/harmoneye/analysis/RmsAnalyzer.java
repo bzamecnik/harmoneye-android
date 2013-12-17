@@ -1,5 +1,6 @@
 package com.harmoneye.analysis;
 
+import com.harmoneye.audio.SoundConsumer;
 import com.harmoneye.viz.Visualizer;
 
 public class RmsAnalyzer implements SoundConsumer {

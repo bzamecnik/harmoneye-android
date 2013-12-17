@@ -1,6 +1,6 @@
 package com.harmoneye.math.cqt;
 
-import org.apache.commons.math3.complex.Complex;
+import com.harmoneye.math.matrix.ComplexVector;
 
 /**
  * Represents a Constant-Q Transform.
@@ -25,6 +25,6 @@ public interface Cqt {
 	 * Transforms a time-domain signal frame to a spectrum with frequency bins
 	 * spaced with constant Q.
 	 */
-	Complex[] transform(double[] signal);
+	ComplexVector transform(double[] signal);
 
 }

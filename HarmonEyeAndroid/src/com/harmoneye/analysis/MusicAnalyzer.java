@@ -2,23 +2,21 @@ package com.harmoneye.analysis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang3.time.StopWatch;
-import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.util.FastMath;
 
-import android.util.Log;
-
-import com.harmoneye.HarmonEyeActivity;
 import com.harmoneye.audio.DecibelCalculator;
 import com.harmoneye.audio.MultiRateRingBufferBank;
+import com.harmoneye.audio.SoundConsumer;
 import com.harmoneye.math.cqt.CqtContext;
 import com.harmoneye.math.cqt.FastCqt;
+import com.harmoneye.math.matrix.ComplexVector;
+import com.harmoneye.math.matrix.DComplex;
 import com.harmoneye.viz.Visualizer;
 
 public class MusicAnalyzer implements SoundConsumer {
 
 	/** [0.0; 1.0] 1.0 = no smoothing */
-	private static final double SMOOTHING_FACTOR = 0.25;
+	private static final double SMOOTHING_FACTOR = 0.5;
 
 	private CqtContext ctx;
 
@@ -48,9 +46,9 @@ public class MusicAnalyzer implements SoundConsumer {
 		ctx = CqtContext.create()
 			.samplingFreq(sampleRate)
 			//.maxFreq((2 << 6) * 65.4063913251)
-			.octaves(4)
+			.octaves(6)
 			.kernelOctaves(1)
-			.binsPerHalftone(5)
+			.binsPerHalftone(7)
 			.build();
 		//@formatter:on
 
@@ -98,14 +96,17 @@ public class MusicAnalyzer implements SoundConsumer {
 		int startIndex = (ctx.getOctaves() - 1) * ctx.getBinsPerOctave();
 		for (int octave = 0; octave < ctx.getOctaves(); octave++, startIndex -= ctx.getBinsPerOctave()) {
 			ringBufferBank.readLast(octave, samples.length, samples);
-			Complex[] cqtSpectrum = cqt.transform(samples);
+			ComplexVector cqtSpectrum = cqt.transform(samples);
 			toAmplitudeDbSpectrum(cqtSpectrum, amplitudeSpectrumDb, startIndex);
 		}
 	}
 
-	private void toAmplitudeDbSpectrum(Complex[] cqtSpectrum, double[] amplitudeSpectrum, int startIndex) {
-		for (int i = 0; i < cqtSpectrum.length; i++) {
-			double amplitude = cqtSpectrum[i].abs();
+	private void toAmplitudeDbSpectrum(ComplexVector cqtSpectrum, double[] amplitudeSpectrum, int startIndex) {
+		double[] elements = cqtSpectrum.getElements();
+		for (int i = 0, index = 0; i < cqtSpectrum.size(); i++, index += 2) {
+			double re = elements[index];
+			double im = elements[index + 1];
+			double amplitude = DComplex.abs(re, im);
 			double amplitudeDb = dbCalculator.amplitudeToDb(amplitude);
 			double value = dbCalculator.rescale(amplitudeDb);
 			amplitudeSpectrumDb[startIndex + i] = value;
@@ -118,11 +119,10 @@ public class MusicAnalyzer implements SoundConsumer {
 		// disabled until it's more optimized 
 		
 //		double[] pitchClassBins = pcDetector.detectPitchClasses(allBins);
-//		
+		
 //		octaveBins = enhance(allBins, pitchClassBins, octaveBins);
 
-//		double[] smoothedOctaveBins = smooth(octaveBins);
-		double[] smoothedOctaveBins = octaveBins;
+		double[] smoothedOctaveBins = smooth(octaveBins);
 		
 		AnalyzedFrame pcProfile = new AnalyzedFrame(ctx, allBins, smoothedOctaveBins);
 		return pcProfile;

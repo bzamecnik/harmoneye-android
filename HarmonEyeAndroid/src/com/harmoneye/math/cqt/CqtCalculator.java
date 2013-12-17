@@ -4,20 +4,19 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.integration.TrapezoidIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
-import org.apache.commons.math3.complex.Complex;
-import org.apache.commons.math3.complex.ComplexUtils;
-import org.apache.commons.math3.transform.DftNormalization;
-import org.apache.commons.math3.transform.FastFourierTransformer;
-import org.apache.commons.math3.transform.TransformType;
 import org.apache.commons.math3.util.FastMath;
 
+import com.harmoneye.math.matrix.ComplexVector;
+import com.harmoneye.math.matrix.DComplex;
 import com.harmoneye.math.window.WindowFunction;
+
+import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 
 public class CqtCalculator {
 
 	private CqtContext ctx;
 
-	private FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
+	private DoubleFFT_1D fft;
 
 	public CqtCalculator(CqtContext ctx) {
 		this.ctx = ctx;
@@ -33,34 +32,44 @@ public class CqtCalculator {
 		return (int) FastMath.ceil(ctx.getQ() * ctx.getSamplingFreq() / centerFreq(binIndex));
 	}
 
-	protected Complex[] temporalKernel(int kernelBinIndex) {
+	protected ComplexVector temporalKernel(int kernelBinIndex) {
 		int size = bandWidth(kernelBinIndex + ctx.getFirstKernelBin());
-		Complex[] coeffs = new Complex[size];
+		ComplexVector coeffs = new ComplexVector(size);
+		double[] coeffsRI = coeffs.getElements();
 		double sizeInv = 1.0 / size;
 		double factor = 2 * FastMath.PI * ctx.getQ() * sizeInv;
+		WindowFunction window = ctx.getWindow();
 		for (int i = 0; i < size; i++) {
-			Complex value = ComplexUtils.polar2Complex(ctx.getWindow().value(i * sizeInv) * sizeInv, i * factor);
-			coeffs[i] = value;
+			double r = window.value(i * sizeInv) * sizeInv;
+			double theta = i * factor;
+			coeffsRI[2 * i] = r * FastMath.cos(theta);
+			coeffsRI[2 * i + 1] = r * FastMath.sin(theta);
 		}
 		return coeffs;
 	}
 
-	public Complex[] spectralKernel(int k) {
-		Complex[] temporalKernel = padLeft(temporalKernel(k), ctx.getSignalBlockSize());
-		Complex[] spectrum = fft.transform(temporalKernel, TransformType.FORWARD);
+	public ComplexVector spectralKernel(int k) {
+		ComplexVector temporalKernel = padLeft(temporalKernel(k), ctx.getSignalBlockSize());
+		double[] data = temporalKernel.getElements();
+		getFft().complexForward(data);
+		ComplexVector spectrum = new ComplexVector(data);
 
-		chop(spectrum);
+		chop(spectrum, ctx.getChopThreshold());
 		return spectrum;
 	}
 
-	public Complex[] conjugatedNormalizedspectralKernel(int k) {
-		Complex[] spectrum = spectralKernel(k);
+	public ComplexVector conjugatedNormalizedspectralKernel(int k) {
+		ComplexVector spectrum = spectralKernel(k);
 		double normalizationFactor = ctx.getNormalizationFactor();
 
-		for (int i = 0; i < spectrum.length; i++) {
-			Complex value = spectrum[i];
-			if (value != Complex.ZERO) {
-				spectrum[i] = value.conjugate().multiply(normalizationFactor);
+		int size = spectrum.size();
+		double[] elements = spectrum.getElements();
+		for (int i = 0; i < size; i++) {
+			double re = elements[2*i];
+			double im = elements[2*i + 1];
+			if (re != 0 && im != 0) {
+				elements[2*i] = normalizationFactor * re;
+				elements[2*i + 1] = normalizationFactor * -im;
 			}
 		}
 
@@ -84,28 +93,39 @@ public class CqtCalculator {
 		return value;
 	}
 
-	public void chop(Complex[] values) {
-		for (int i = 0; i < values.length; i++) {
-			if (values[i].abs() < ctx.getChopThreshold()) {
-				values[i] = Complex.ZERO;
+	public void chop(ComplexVector values, double threshold) {
+		int size = values.size();
+		double[] elements = values.getElements();
+		for (int i = 0; i < size; i++) {
+			double re = elements[2 * i];
+			double im = elements[2 * i + 1];
+			double abs = DComplex.abs(re, im);
+			if (abs < threshold) {
+				elements[2 * i] = 0;
+				elements[2 * i + 1] = 0;
 			}
 		}
 	}
 
-	public Complex[] conjugate(Complex[] values) {
-		for (int i = 0; i < values.length; i++) {
-			values[i] = values[i].conjugate();
+	public ComplexVector conjugate(ComplexVector values) {
+		int size = values.size();
+		double[] elements = values.getElements();
+		for (int i = 0; i < size; i++) {
+			elements[2 * i + 1] = -elements[2 * i + 1];
 		}
 		return values;
 	}
 
-	public Complex[] padLeft(Complex[] values, int totalSize) {
-		Complex[] padded = new Complex[totalSize];
-		int dataSize = FastMath.min(values.length, totalSize);
+	public ComplexVector padLeft(ComplexVector values, int totalSize) {
+		if (values.size() == totalSize) {
+			return values;
+		}
+		ComplexVector padded = new ComplexVector(totalSize);
+		int dataSize = FastMath.min(values.size(), totalSize);
 		int paddingSize = totalSize - dataSize;
 
-		Arrays.fill(padded, 0, paddingSize, Complex.ZERO);
-		System.arraycopy(values, 0, padded, paddingSize, dataSize);
+		Arrays.fill(padded.getElements(), 0, 2 * paddingSize, 0);
+		System.arraycopy(values.getElements(), 0, padded.getElements(), 2 * paddingSize, 2 * dataSize);
 
 		return padded;
 	}
@@ -117,38 +137,19 @@ public class CqtCalculator {
 		Arrays.fill(padded, dataSize, padded.length, 0);
 	}
 
-	@Deprecated
-	public Complex[] padRight(Complex[] values, int totalSize) {
-		Complex[] padded = new Complex[totalSize];
-		int size = FastMath.min(values.length, totalSize);
-		for (int i = 0; i < size; i++) {
-			padded[i] = values[i];
-		}
-		for (int i = values.length; i < totalSize; i++) {
-			padded[i] = Complex.ZERO;
-		}
-		return padded;
-	}
-
-	@Deprecated
-	public double[] padRight(double[] values, int totalSize) {
-		double[] padded = new double[totalSize];
-		int size = FastMath.min(values.length, totalSize);
-		for (int i = 0; i < size; i++) {
-			padded[i] = values[i];
-		}
-		for (int i = values.length; i < totalSize; i++) {
-			padded[i] = 0;
-		}
-		return padded;
-	}
-
 	public double sum(double[] values) {
 		double sum = 0;
 		for (int i = 0; i < values.length; i++) {
 			sum += values[i];
 		}
 		return sum;
+	}
+
+	public DoubleFFT_1D getFft() {
+		if (fft == null) {
+			fft = new DoubleFFT_1D(ctx.getSignalBlockSize());
+		}
+		return fft;
 	}
 
 }

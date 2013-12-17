@@ -12,7 +12,7 @@ import android.util.Log;
 import com.harmoneye.HarmonEyeActivity;
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.analysis.MusicAnalyzer;
-import com.harmoneye.analysis.SoundConsumer;
+import com.harmoneye.audio.SoundConsumer;
 import com.harmoneye.viz.Visualizer;
 
 public class Capture implements Runnable {

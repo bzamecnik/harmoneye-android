@@ -15,6 +15,11 @@ public class HarmonicPatternPitchClassDetector {
 	private int binsPerOctave;
 	private int binsPerHalftoneHalf;
 	private double baseFreq;
+	private double baseFreqInv;
+
+	private double[] octaveBins;
+
+	private double[] harmonics;
 
 	public HarmonicPatternPitchClassDetector(CqtContext ctx) {
 		this(ctx, DEFAULT_HARMONIC_COUNT);
@@ -26,6 +31,7 @@ public class HarmonicPatternPitchClassDetector {
 		binsPerOctave = ctx.getBinsPerOctave();
 		binsPerHalftoneHalf = ctx.getBinsPerHalftone() / 2;
 		baseFreq = ctx.getBaseFreq();
+		baseFreqInv = 1.0 / baseFreq;
 	}
 
 	/**
@@ -36,8 +42,9 @@ public class HarmonicPatternPitchClassDetector {
 	 * @return
 	 */
 	public double[] detectPitchClasses(double[] cqBins) {
-		// TODO: do the calculation in-place
-		double[] octaveBins = new double[binsPerOctave];
+		if (octaveBins == null) {
+			octaveBins = new double[binsPerOctave];
+		}
 		for (int i = 0; i < cqBins.length; i++) {
 			octaveBins[i % binsPerOctave] += calc.sum(extractHarmonics(cqBins, i, harmonicCount));
 		}
@@ -53,9 +60,9 @@ public class HarmonicPatternPitchClassDetector {
 			max = FastMath.max(max, octaveBins[i]);
 		}
 		if (max > 0) {
+			double maxInv = 1.0 / max;
 			for (int i = 0; i < octaveBins.length; i++) {
-				// TODO: precompute the inverse value
-				octaveBins[i] /= max;
+				octaveBins[i] *= maxInv;
 			}
 		}
 
@@ -63,14 +70,15 @@ public class HarmonicPatternPitchClassDetector {
 	}
 
 	private double[] extractHarmonics(double[] cqBins, int baseFreqBin, int harmonicCount) {
-		// TODO: do the calculation in-place
-		double[] harmonics = new double[harmonicCount];
+		if (harmonics == null) {
+			harmonics = new double[harmonicCount];
+		}
+		double invFactor = 1.0 / (double) (harmonicCount - 1);
 		for (int i = 1; i <= harmonicCount; i++) {
 			double frequency = calc.centerFreq(baseFreqBin);
-			int harmonicBin = harmonicFreqBin(frequency, i);
+			int harmonicBin = 0;//harmonicFreqBin(frequency, i);
 			if (harmonicBin < cqBins.length) {
-				// TODO: precompute the inverse value
-				double weight = 1 - 0.4 * i / (double) (harmonicCount - 1);
+				double weight = 1 - 0.4 * i * invFactor;
 				harmonics[i - 1] = weight * cqBins[harmonicBin];
 			}
 		}
@@ -84,7 +92,7 @@ public class HarmonicPatternPitchClassDetector {
 	 */
 	private int harmonicFreqBin(double frequency, int harmonicIndex) {
 		// TODO: try to precompute the log
-		return (int) FastMath.round(binsPerOctave * FastMath.log(2, harmonicIndex * frequency / baseFreq))
+		return (int) FastMath.round(binsPerOctave * FastMath.log(2, harmonicIndex * frequency * baseFreqInv))
 			+ binsPerHalftoneHalf;
 	}
 }
