@@ -7,7 +7,6 @@ import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 import com.harmoneye.android.R;
 import com.harmoneye.audio.android.Capture;
@@ -19,8 +18,8 @@ public class HarmonEyeActivity extends Activity {
 	public static final String LOG_TAG = "HarmonEye";
 
 	private Capture soundCapture;
-	private TextView textView;
 	private MyGLSurfaceView glView;
+	private OpenGlVisualizer visualizer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -31,10 +30,10 @@ public class HarmonEyeActivity extends Activity {
 			WindowManager.LayoutParams.FLAG_FULLSCREEN,
 			WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-		textView = new TextView(this);
 		glView = new MyGLSurfaceView(this);
+		visualizer = new OpenGlVisualizer(glView);
 
-		setContentView(textView);
+		setContentView(glView);
 
 		toggle();
 	}
@@ -45,9 +44,7 @@ public class HarmonEyeActivity extends Activity {
 			stop();
 		} else {
 			if (soundCapture == null) {
-				printText("Initializing...");
-				soundCapture = new Capture(new OpenGlVisualizer(glView));
-				setContentView(glView);
+				soundCapture = new Capture(visualizer);
 			}
 			Thread thread = new Thread(soundCapture);
 			thread.start();
@@ -59,13 +56,6 @@ public class HarmonEyeActivity extends Activity {
 	private void stop() {
 		if (soundCapture != null) {
 			soundCapture.stop();
-		}
-	}
-
-	public void printText(String text) {
-		if (textView != null) {
-			textView.setText(text);
-			textView.invalidate();
 		}
 	}
 

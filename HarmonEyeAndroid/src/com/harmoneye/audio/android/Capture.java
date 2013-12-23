@@ -30,8 +30,10 @@ public class Capture implements Runnable {
 
 	private AudioRecord recorder;
 	private SoundConsumer soundConsumer;
+	private Visualizer<AnalyzedFrame> visualizer;
 
 	private AtomicBoolean running = new AtomicBoolean();
+	private AtomicBoolean initialized = new AtomicBoolean();
 
 	private int bufferSizeInBytes;
 	private int bufferSizeInSamples;
@@ -39,8 +41,7 @@ public class Capture implements Runnable {
 	private double[] amplitudes;
 
 	public Capture(Visualizer<AnalyzedFrame> visualizer) {
-		initBuffers();
-		initComponents(visualizer);
+		this.visualizer = visualizer;
 	}
 
 	private void initBuffers() {
@@ -66,6 +67,13 @@ public class Capture implements Runnable {
 
 	public void run() {
 		running.set(true);
+		
+		if (!initialized.get()) {
+			initBuffers();
+			initComponents(visualizer);
+			initialized.set(true);
+		}
+		
 		try {
 			recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, AUDIO_SAMPLE_RATE, AUDIO_CHANNELS,
 				AUDIO_FORMAT, bufferSizeInBytes);
