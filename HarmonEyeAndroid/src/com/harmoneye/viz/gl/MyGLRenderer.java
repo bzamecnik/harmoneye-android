@@ -60,6 +60,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 	private boolean initialized;
 
+	private Circle initCircle;
+
+	private boolean hasValue;
+
 	@Override
 	public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 		GLES20.glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
@@ -69,6 +73,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		circularSectorGraph = new CircularSectorGraph(OUTER_CIRCLE_SCALE);
 		float[] lightGrey = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
 		float[] darkGrey = new float[] { 0.25f, 0.25f, 0.25f, 1.0f };
+		float[] red = new float[] { 0.75f, 0.25f, 0.25f, 1.0f };
+		initCircle = new Circle(30, 0.9f * INNER_CIRCLE_SCALE, red, null);
 		outerCircle = new Circle(100, OUTER_CIRCLE_SCALE, null, lightGrey);
 		innerCircle = new Circle(30, INNER_CIRCLE_SCALE, darkGrey, lightGrey);
 		circularGrid = new CircularGrid(12, OUTER_CIRCLE_SCALE, lightGrey);
@@ -88,6 +94,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 			circularGrid.draw(modelViewProjection);
 			circularSectorGraph.draw(modelViewProjection);
 			innerCircle.draw(modelViewProjection);
+			if (!hasValue) {
+				initCircle.draw(modelViewProjection);
+			}
 		}
 	}
 
@@ -165,6 +174,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		if (initialized) {
 			circularSectorGraph.setValue(frame);
 		}
+		hasValue = true;
 	}
 
 	public boolean isMsaaEnabled() {
