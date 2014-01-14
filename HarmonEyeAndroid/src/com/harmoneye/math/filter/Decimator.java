@@ -17,7 +17,9 @@ public class Decimator {
 	}
 
 	public static Decimator withDefaultFilter() {
-		return new Decimator(new ZeroPhaseFilter(new ButterworthFilter()));
+		// TODO: zero-phase filter without streaming has problems with DC bias
+		//return new Decimator(new ZeroPhaseFilter(new ButterworthFilter()));
+		return new Decimator(ButterworthFilter.newStreamingFilter());
 	}
 
 	public double[] decimate(double[] signal) {
