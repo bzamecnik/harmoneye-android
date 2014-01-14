@@ -86,6 +86,7 @@ public class Capture implements Runnable {
 				// this is a blocking operation - waits until there's enough data
 				recorder.read(samples, 0, bufferSizeInSamples);
 				toAmplitudes(samples, amplitudes);
+				removeMean(amplitudes);
 				soundConsumer.consume(amplitudes);
 			}
 			recorder.stop();
@@ -109,4 +110,22 @@ public class Capture implements Runnable {
 			amplitudes[i] = samples[i] * SHORT_TO_DOUBLE;
 		}
 	}
+	
+	// remove DC bias
+	private void removeMean(double[] values) {
+		double mean = mean(values);
+		for (int i = 0; i < values.length; i++) {
+			values[i] -= mean; 
+		}
+	}
+	
+	private double mean(double[] values) {
+		double mean = 0;
+		for (int i = 0; i < values.length; i++) {
+			mean += values[i];
+		}
+		mean /= values.length;
+		return mean;
+	}
+
 }
