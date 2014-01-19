@@ -18,15 +18,18 @@ package com.harmoneye.viz.gl;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
 import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.android.R;
 import com.harmoneye.viz.gl.shape.Circle;
 import com.harmoneye.viz.gl.shape.CircularGrid;
 import com.harmoneye.viz.gl.shape.CircularSectorGraph;
+import com.harmoneye.viz.gl.shape.TexturedQuad;
 
 /**
  * Provides drawing instructions for a GLSurfaceView object. This class must
@@ -54,15 +57,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	private Circle outerCircle;
 	private Circle innerCircle;
 	private CircularGrid circularGrid;
+	private TexturedQuad introLogo;
 
 	/** indicates whether multi-sample anti-aliasing is enabled */
 	private boolean msaaEnabled;
 
 	private boolean initialized;
 
-	private Circle initCircle;
-
 	private boolean hasValue;
+
+	private Context activityContext;
+
+	public MyGLRenderer(Context context) {
+		this.activityContext = context;
+	}
 
 	@Override
 	public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -71,18 +79,24 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 
 		circularSectorGraph = new CircularSectorGraph(OUTER_CIRCLE_SCALE);
-		float[] lightGrey = new float[] { 0.35f, 0.35f, 0.35f, 1.0f };
+		float[] midGrey = new float[] { 0.35f, 0.35f, 0.35f, 1.0f };
 		float[] darkGrey = new float[] { 0.25f, 0.25f, 0.25f, 1.0f };
-		float[] red = new float[] { 0.75f, 0.25f, 0.25f, 1.0f };
-		initCircle = new Circle(30, 0.8f * INNER_CIRCLE_SCALE, red, null);
-		outerCircle = new Circle(100, OUTER_CIRCLE_SCALE, null, lightGrey);
-		innerCircle = new Circle(30, INNER_CIRCLE_SCALE, darkGrey, lightGrey);
-		circularGrid = new CircularGrid(12, OUTER_CIRCLE_SCALE, lightGrey);
+		outerCircle = new Circle(100, OUTER_CIRCLE_SCALE, null, midGrey);
+		innerCircle = new Circle(30, INNER_CIRCLE_SCALE, darkGrey, midGrey);
+		circularGrid = new CircularGrid(12, OUTER_CIRCLE_SCALE, midGrey);
+		introLogo = new TexturedQuad(activityContext, R.drawable.intro);
 		initialized = true;
 	}
 
 	@Override
 	public void onDrawFrame(GL10 unused) {
+		boolean introEnabled = !hasValue;
+		if (introEnabled) {
+			GLES20.glClearColor(0.8f, 0.8f, 0.8f, 0.0f);
+		} else {
+			GLES20.glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+		}
+		
 		int clearMask = GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT;
 		if (msaaEnabled) {
 			clearMask |= GL_COVERAGE_BUFFER_BIT_NV;
@@ -90,12 +104,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		GLES20.glClear(clearMask);
 
 		if (initialized) {
-			outerCircle.draw(modelViewProjection);
-			circularGrid.draw(modelViewProjection);
-			circularSectorGraph.draw(modelViewProjection);
-			innerCircle.draw(modelViewProjection);
-			if (!hasValue) {
-				initCircle.draw(modelViewProjection);
+			if (introEnabled) {
+				introLogo.draw(modelViewProjection);
+			} else {
+				outerCircle.draw(modelViewProjection);
+				circularGrid.draw(modelViewProjection);
+				circularSectorGraph.draw(modelViewProjection);
+				innerCircle.draw(modelViewProjection);
 			}
 		}
 	}
@@ -108,14 +123,23 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 		if (width > height) {
 			float ratio = (float) width / height;
-			Matrix.orthoM(projection, 0, -ratio, ratio, -1, 1, 3, 7);
+			Matrix.orthoM(projection, 0, -ratio, ratio, -1, 1, -1, 1);
 		} else {
 			float ratio = (float) height / width;
-			Matrix.orthoM(projection, 0, -1, 1, -ratio, ratio, 3, 7);
+			Matrix.orthoM(projection, 0, -1, 1, -ratio, ratio, -1, 1);
 		}
+		
+//		if (width > height) {
+//			float ratio = (float) width / height;
+//			Matrix.orthoM(projection, 0, -ratio, ratio, -1, 1, -1, 1);
+//		} else {
+//			float ratio = (float) height / width;
+//			Matrix.orthoM(projection, 0, -1, 1, -ratio, ratio, -1, 1);
+//		}
 
 		// Set the camera position (View matrix)
-		Matrix.setLookAtM(view, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+		Matrix.setLookAtM(view, 0, 0, 0, 1, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+//		Matrix.setLookAtM(view, 0, 0, 0, 0, 0, 0, -1, 0, 1, 0);
 
 		// Calculate the projection and view transformation
 		Matrix.multiplyMM(modelViewProjection, 0, projection, 0, view, 0);

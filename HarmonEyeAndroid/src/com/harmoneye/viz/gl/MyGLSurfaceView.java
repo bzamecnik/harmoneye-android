@@ -25,7 +25,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
 		setEGLConfigChooser(msaaConfigChooser);
 
 		// Set the Renderer for drawing on the GLSurfaceView
-		renderer = new MyGLRenderer();
+		renderer = new MyGLRenderer(context);
 		renderer.setMsaaEnabled(msaaConfigChooser.isMsaaEnabled());
 		setRenderer(renderer);
 
