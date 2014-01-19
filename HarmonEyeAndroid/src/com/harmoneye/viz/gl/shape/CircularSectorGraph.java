@@ -152,6 +152,9 @@ public class CircularSectorGraph {
 	// eg. 1 for straight diagram, 7 for circle of fifths
 	private int pitchStep = 1;
 
+	private float[] model = new float[16];
+	private float[] mvp = new float[16];
+
 	/**
 	 * Sets up the drawing object data for use in an OpenGL ES context.
 	 */
@@ -232,9 +235,7 @@ public class CircularSectorGraph {
 		int valueHandle = GLES20.glGetUniformLocation(program, "value");
 		MyGLRenderer.checkGlError("glGetUniformLocation");
 
-		float[] model = new float[16];
-		float[] mvp = new float[16];
-
+		
 		float sectorCountInvDegrees = 360 * sectorCountInv;
 
 		// hack to prevent holes between adjacent triangles

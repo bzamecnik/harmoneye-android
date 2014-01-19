@@ -63,6 +63,10 @@ public class CircularGrid {
 	private float scale;
 	private float[] color;
 
+	private float[] model;
+
+	private float[] mvp;
+
 	/**
 	 * Sets up the drawing object data for use in an OpenGL ES context.
 	 */
@@ -75,6 +79,9 @@ public class CircularGrid {
 		vertexBuffer = initVertexBuffer();
 		drawListBuffer = initDrawListBuffer();
 		program = initShaderProgram();
+		
+		model = new float[16];
+		mvp = new float[16];
 	}
 
 	/** initialize vertex byte buffer for shape coordinates */
@@ -144,8 +151,7 @@ public class CircularGrid {
 		GLES20.glUniform4fv(colorHandle, 1, color, 0);
 		MyGLRenderer.checkGlError("glUniform4fv");
 
-		float[] model = new float[16];
-		float[] mvp = new float[16];
+		
 
 		float sectorCountInvDegrees = 360 * sectorCountInv;
 

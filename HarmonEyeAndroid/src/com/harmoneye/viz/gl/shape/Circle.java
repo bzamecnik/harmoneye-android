@@ -53,6 +53,9 @@ public class Circle {
 	private float[] fillColor;
 	private float[] borderColor;
 
+	// modified MVP matrix
+	float[] mvp = new float[16];
+	
 	/**
 	 * Sets up the drawing object data for use in an OpenGL ES context.
 	 */
@@ -151,9 +154,6 @@ public class Circle {
 
 		int mvpMatrixHandle = GLES20.glGetUniformLocation(program, "mvpMatrix");
 		MyGLRenderer.checkGlError("glGetUniformLocation");
-
-		// modified MVP matrix
-		float[] mvp = new float[16];
 
 		Matrix.scaleM(mvp, 0, mvpMatrix, 0, scale, scale, 1);
 
