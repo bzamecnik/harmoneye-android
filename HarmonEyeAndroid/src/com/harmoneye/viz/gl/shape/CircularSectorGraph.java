@@ -250,7 +250,7 @@ public class CircularSectorGraph {
 
 			Matrix.setIdentityM(model, 0);
 
-			float angle = (i - halfBinsPerHalftone) * sectorCountInvDegrees;
+			float angle = -(i - halfBinsPerHalftone) * sectorCountInvDegrees;
 			Matrix.setRotateM(model, 0, angle, 0, 0, 1);
 
 			float sectorLength = scale * value;
