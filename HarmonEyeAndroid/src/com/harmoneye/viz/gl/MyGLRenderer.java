@@ -77,6 +77,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		GLES20.glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+		GLES20.glDisable(GLES20.GL_DITHER);
 
 		circularSectorGraph = new CircularSectorGraph(OUTER_CIRCLE_SCALE);
 		float[] midGrey = new float[] { 0.35f, 0.35f, 0.35f, 1.0f };
