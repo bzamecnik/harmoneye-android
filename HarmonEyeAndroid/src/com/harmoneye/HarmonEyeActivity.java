@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -79,15 +78,6 @@ public class HarmonEyeActivity extends Activity {
 		super.onDestroy();
 		Log.i(LOG_TAG, "destroy");
 		stop();
-	}
-
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			Log.i(LOG_TAG, "touch down");
-			toggle();
-		}
-		return super.onTouchEvent(event);
 	}
 
 	@Override
