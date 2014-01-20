@@ -1,5 +1,8 @@
 package com.harmoneye;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,6 +10,7 @@ import android.view.Menu;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.harmoneye.analysis.MusicAnalyzer;
 import com.harmoneye.android.R;
 import com.harmoneye.audio.android.Capture;
 import com.harmoneye.viz.OpenGlVisualizer;
@@ -48,13 +52,31 @@ public class HarmonEyeActivity extends Activity {
 			Thread thread = new Thread(soundCapture);
 			thread.start();
 
+			startUpdateTimer();
 		}
 		Log.i(LOG_TAG, soundCapture.isRunning() ? "running" : "stopped");
+	}
+
+	private void startUpdateTimer() {
+		updateTimer = new Timer("update timer");
+		TimerTask updateTask = new TimerTask() {
+			@Override
+			public void run() {
+				MusicAnalyzer musicAnalyzer = soundCapture.getMusicAnalyzer();
+				if (musicAnalyzer != null) {
+					musicAnalyzer.updateSignal();
+				}
+			}
+		};
+		updateTimer.scheduleAtFixedRate(updateTask, 200, TIME_PERIOD_MILLIS);
 	}
 
 	private void stop() {
 		if (soundCapture != null) {
 			soundCapture.stop();
+		}
+		if (updateTimer != null) {
+			updateTimer.cancel();
 		}
 	}
 

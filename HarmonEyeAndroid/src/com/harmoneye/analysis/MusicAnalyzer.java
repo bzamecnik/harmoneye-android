@@ -69,7 +69,7 @@ public class MusicAnalyzer implements SoundConsumer {
 	@Override
 	public void consume(double[] samples) {
 		ringBufferBank.write(samples);
-		updateSignal();
+//		updateSignal();
 	}
 
 	public void updateSignal() {

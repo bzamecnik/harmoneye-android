@@ -12,8 +12,9 @@ import android.util.Log;
 import com.harmoneye.HarmonEyeActivity;
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.analysis.MusicAnalyzer;
-import com.harmoneye.audio.SoundConsumer;
 import com.harmoneye.viz.Visualizer;
+
+// TODO: remove direct coupling with MusicAnalyzer!
 
 public class Capture implements Runnable {
 
@@ -29,7 +30,7 @@ public class Capture implements Runnable {
 	private static final double SHORT_TO_DOUBLE = 2 / (double) 0xffff;
 
 	private AudioRecord recorder;
-	private SoundConsumer soundConsumer;
+	private MusicAnalyzer musicAnalyzer;
 	private Visualizer<AnalyzedFrame> visualizer;
 
 	private AtomicBoolean running = new AtomicBoolean();
@@ -60,7 +61,7 @@ public class Capture implements Runnable {
 	private void initComponents(Visualizer<AnalyzedFrame> visualizer) {
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
-		this.soundConsumer = new MusicAnalyzer(visualizer, AUDIO_SAMPLE_RATE, AUDIO_BITS_PER_SAMPLE);
+		this.musicAnalyzer = new MusicAnalyzer(visualizer, AUDIO_SAMPLE_RATE, AUDIO_BITS_PER_SAMPLE);
 		stopWatch.stop();
 		Log.i(HarmonEyeActivity.LOG_TAG, "Initialized the MusicAnalyzer in " + stopWatch.getTime() + " ms");
 	}
@@ -87,7 +88,7 @@ public class Capture implements Runnable {
 				recorder.read(samples, 0, bufferSizeInSamples);
 				toAmplitudes(samples, amplitudes);
 				removeMean(amplitudes);
-				soundConsumer.consume(amplitudes);
+				musicAnalyzer.consume(amplitudes);
 			}
 			recorder.stop();
 		} finally {
@@ -128,4 +129,7 @@ public class Capture implements Runnable {
 		return mean;
 	}
 
+	public MusicAnalyzer getMusicAnalyzer() {
+		return musicAnalyzer;
+	}
 }
