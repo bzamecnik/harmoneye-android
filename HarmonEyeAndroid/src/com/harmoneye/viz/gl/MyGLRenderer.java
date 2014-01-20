@@ -58,6 +58,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	private Circle innerCircle;
 	private CircularGrid circularGrid;
 	private TexturedQuad introLogo;
+	private TexturedQuad toneNames;
 
 	/** indicates whether multi-sample anti-aliasing is enabled */
 	private boolean msaaEnabled;
@@ -85,7 +86,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		outerCircle = new Circle(100, OUTER_CIRCLE_SCALE, null, midGrey);
 		innerCircle = new Circle(30, INNER_CIRCLE_SCALE, darkGrey, midGrey);
 		circularGrid = new CircularGrid(12, OUTER_CIRCLE_SCALE, midGrey);
-		introLogo = new TexturedQuad(activityContext, R.drawable.intro);
+		introLogo = new TexturedQuad(activityContext, R.drawable.intro, 0.6f);
+		toneNames = new TexturedQuad(activityContext, R.drawable.tone_name_circle, OUTER_CIRCLE_SCALE);
 		initialized = true;
 	}
 
@@ -108,6 +110,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 			if (introEnabled) {
 				introLogo.draw(modelViewProjection);
 			} else {
+				toneNames.draw(modelViewProjection);
 				outerCircle.draw(modelViewProjection);
 				circularGrid.draw(modelViewProjection);
 				circularSectorGraph.draw(modelViewProjection);

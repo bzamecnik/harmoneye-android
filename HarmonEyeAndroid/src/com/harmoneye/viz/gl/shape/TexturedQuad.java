@@ -59,11 +59,11 @@ public class TexturedQuad {
 	private int mTextureDataHandle;
 
 	private int textureResource;
-	
+
 	/**
 	 * Initialize the model data.
 	 */
-	public TexturedQuad(final Context activityContext, int textureResource)
+	public TexturedQuad(final Context activityContext, int textureResource, float scaleFactor)
 	{	
 		this.mActivityContext = activityContext;
 		this.textureResource = textureResource;
@@ -106,7 +106,6 @@ public class TexturedQuad {
 		};
 		
         Matrix.setIdentityM(mModelMatrix, 0);
-        float scaleFactor = 0.6f;
 		Matrix.scaleM(mModelMatrix, 0, scaleFactor, scaleFactor, 1f);
 		
 		// Initialize the buffers.
