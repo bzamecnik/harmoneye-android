@@ -20,17 +20,20 @@ public class HarmonEyeActivity extends Activity {
 
 	public static final String LOG_TAG = "HarmonEye";
 
+	private static final int TIME_PERIOD_MILLIS = 25;
+
 	private Capture soundCapture;
 	private MyGLSurfaceView glView;
 	private OpenGlVisualizer visualizer;
+
+	private Timer updateTimer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(
-			WindowManager.LayoutParams.FLAG_FULLSCREEN,
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 			WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		glView = new MyGLSurfaceView(this);
