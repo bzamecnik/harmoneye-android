@@ -75,14 +75,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 	@Override
 	public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-		GLES20.glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+		GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 		GLES20.glDisable(GLES20.GL_DITHER);
 
 		circularSectorGraph = new CircularSectorGraph(OUTER_CIRCLE_SCALE);
 		float[] midGrey = new float[] { 0.35f, 0.35f, 0.35f, 1.0f };
-		float[] darkGrey = new float[] { 0.25f, 0.25f, 0.25f, 1.0f };
+		float[] darkGrey = new float[] { 0.1f, 0.1f, 0.1f, 1.0f };
 		outerCircle = new Circle(100, OUTER_CIRCLE_SCALE, null, midGrey);
 		innerCircle = new Circle(30, INNER_CIRCLE_SCALE, darkGrey, midGrey);
 		circularGrid = new CircularGrid(12, OUTER_CIRCLE_SCALE, midGrey);
@@ -97,7 +97,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		if (introEnabled) {
 			GLES20.glClearColor(0.8f, 0.8f, 0.8f, 0.0f);
 		} else {
-			GLES20.glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+			GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		}
 		
 		int clearMask = GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT;
