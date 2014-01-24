@@ -40,8 +40,6 @@ public class HarmonEyeActivity extends Activity {
 		visualizer = new OpenGlVisualizer(glView);
 
 		setContentView(glView);
-
-		toggle();
 	}
 
 	private void toggle() {
@@ -88,6 +86,7 @@ public class HarmonEyeActivity extends Activity {
 		super.onResume();
 		Log.i(LOG_TAG, "resume");
 		glView.onResume();
+		toggle();
 	}
 
 	@Override
