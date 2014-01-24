@@ -85,7 +85,7 @@ public class MusicAnalyzer implements SoundConsumer {
 			}
 		}
 		percussionSuppressor = new PercussionSuppressor(ctx.getTotalBins(), 7);
-		spectralEqualizer = new SpectralEqualizer(ctx.getTotalBins(), 30);
+		spectralEqualizer = new SpectralEqualizer(ctx.getTotalBins(), 50);
 
 		cqt = new FastCqt(ctx);
 		cqt.init();
