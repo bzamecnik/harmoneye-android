@@ -155,7 +155,7 @@ public class CircularGrid {
 
 		float sectorCountInvDegrees = 360 * sectorCountInv;
 
-		GLES20.glLineWidth(1.5f);
+		GLES20.glLineWidth(2f);
 		
 		// rays
 		for (int i = 0; i < sectorCount; i++) {
