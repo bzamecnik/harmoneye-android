@@ -2,7 +2,7 @@ package com.harmoneye.math.cqt;
 
 import org.apache.commons.math3.util.FastMath;
 
-import com.harmoneye.math.window.HammingWindow;
+import com.harmoneye.math.window.BlackmanWindow;
 import com.harmoneye.math.window.WindowFunction;
 
 public final class CqtContext {
@@ -12,7 +12,7 @@ public final class CqtContext {
 	private double samplingFreq = 22050;
 	private int halftonesPerOctave = 12;
 	private int binsPerHalftone = 5;
-	private WindowFunction window = new HammingWindow();
+	private WindowFunction window = new BlackmanWindow();
 	private double chopThreshold = 0.005;
 
 	private double baseFreq;
