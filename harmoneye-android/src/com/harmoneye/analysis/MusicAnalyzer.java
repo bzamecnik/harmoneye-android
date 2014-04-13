@@ -10,6 +10,7 @@ import com.harmoneye.audio.MultiRateRingBufferBank;
 import com.harmoneye.audio.SoundConsumer;
 import com.harmoneye.math.cqt.CqtContext;
 import com.harmoneye.math.cqt.FastCqt;
+import com.harmoneye.math.filter.ExpSmoother;
 import com.harmoneye.math.matrix.ComplexVector;
 import com.harmoneye.math.matrix.DComplex;
 import com.harmoneye.viz.Visualizer;
