@@ -21,3 +21,5 @@
 
 -dontwarn org.junit.**
 -dontwarn java.awt.**
+-dontwarn org.w3c.dom.**
+-dontwarn org.hamcrest.**
