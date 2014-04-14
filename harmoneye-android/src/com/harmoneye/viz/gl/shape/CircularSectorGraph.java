@@ -10,6 +10,7 @@ import android.opengl.Matrix;
 
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.math.cqt.CqtContext;
+import com.harmoneye.music.TonicDistance;
 import com.harmoneye.viz.gl.MyGLRenderer;
 
 public class CircularSectorGraph {
@@ -29,7 +30,10 @@ public class CircularSectorGraph {
 
 	private static final String fragmentShaderCode =
 		"precision mediump float;" +
-		"uniform float value;" +
+//		"uniform float value;" +
+		"uniform float hue;" +
+		"uniform float saturation;" +
+		"uniform float brightness;" +
 		// http://kristophercollins.blogspot.com/2010/08/glsl-hsb-to-rgb-function.html
 		"vec3 hsbToRgb(vec3 colorIn) {" +
 		"	float h = colorIn.x;" +
@@ -103,7 +107,8 @@ public class CircularSectorGraph {
 		"}" +
 		"void main() {" +
 		"  vec4 color = vec4(0.0, 0.0, 0.0, 1.0);" +
-		"  color.rgb = temperatureColor(value);" +
+//		"  color.rgb = temperatureColor(value);" +
+		"  color.rgb = hsbToRgb(vec3(hue, saturation, brightness));" +
 		"  gl_FragColor = color;" +
 		"}";
 	//@formatter:on
@@ -145,6 +150,7 @@ public class CircularSectorGraph {
 	private AnalyzedFrame frame;
 
 	private double values[];
+	private Integer key;
 
 	private int binsPerHalftone;
 	private int halftoneCount;
@@ -154,6 +160,8 @@ public class CircularSectorGraph {
 
 	private float[] model = new float[16];
 	private float[] mvp = new float[16];
+
+	private TonicDistance tonicDistance = new TonicDistance(12);
 
 	/**
 	 * Sets up the drawing object data for use in an OpenGL ES context.
@@ -232,10 +240,16 @@ public class CircularSectorGraph {
 		MyGLRenderer.checkGlError("glGetUniformLocation");
 
 		// value of the sector
-		int valueHandle = GLES20.glGetUniformLocation(program, "value");
+//		 int valueHandle = GLES20.glGetUniformLocation(program, "value");
+//		 MyGLRenderer.checkGlError("glGetUniformLocation");
+
+		int hueHandle = GLES20.glGetUniformLocation(program, "hue");
+		MyGLRenderer.checkGlError("glGetUniformLocation");
+		int saturationHandle = GLES20.glGetUniformLocation(program, "saturation");
+		MyGLRenderer.checkGlError("glGetUniformLocation");
+		int brightnessHandle = GLES20.glGetUniformLocation(program, "brightness");
 		MyGLRenderer.checkGlError("glGetUniformLocation");
 
-		
 		float sectorCountInvDegrees = 360 * sectorCountInv;
 
 		// hack to prevent holes between adjacent triangles
@@ -262,7 +276,19 @@ public class CircularSectorGraph {
 			GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvp, 0);
 			MyGLRenderer.checkGlError("glUniformMatrix4fv");
 
-			GLES20.glUniform1f(valueHandle, value);
+//			 GLES20.glUniform1f(valueHandle, value);
+//			 MyGLRenderer.checkGlError("glUniform1f");
+
+			float hue = key != null ? tonicDistance.distanceToHue(tonicDistance
+				.distance(movedPitchClass, key)) : 0;
+			float saturation = key != null ? 0.1f + 0.75f * value : 0;
+			float brightness = 0.25f + 0.75f * value;
+
+			GLES20.glUniform1f(hueHandle, hue);
+			MyGLRenderer.checkGlError("glUniform1f");
+			GLES20.glUniform1f(saturationHandle, saturation);
+			MyGLRenderer.checkGlError("glUniform1f");
+			GLES20.glUniform1f(brightnessHandle, brightness);
 			MyGLRenderer.checkGlError("glUniform1f");
 
 			GLES20.glDrawElements(GLES20.GL_TRIANGLES,
@@ -283,6 +309,7 @@ public class CircularSectorGraph {
 			halftoneCount = ctx.getHalftonesPerOctave();
 
 			values = frame.getOctaveBins();
+			key = frame.getKey();
 			sectorCount = values.length;
 			sectorCountInv = 1.0f / sectorCount;
 			tanAlpha = (float) Math.tan(Math.PI * sectorCountInv);

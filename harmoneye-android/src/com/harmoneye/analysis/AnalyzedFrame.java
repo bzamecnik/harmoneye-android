@@ -8,17 +8,19 @@ public class AnalyzedFrame {
 	private final double[] octaveBins;
 	private final CqtContext ctx;
 	private double[] detectedPitchClasses;
+	private Integer key;
 
 	public AnalyzedFrame(CqtContext ctx, double[] allBins, double[] octaveBins) {
-		this(ctx, allBins, octaveBins, null);
+		this(ctx, allBins, octaveBins, null, null);
 	}
 
 	public AnalyzedFrame(CqtContext ctx, double[] allBins, double[] octaveBins,
-		double[] detectedPitchClasses) {
+		double[] detectedPitchClasses, Integer key) {
 		this.allBins = allBins;
 		this.octaveBins = octaveBins;
 		this.ctx = ctx;
 		this.detectedPitchClasses = detectedPitchClasses;
+		this.key = key;
 	}
 
 	public double[] getAllBins() {
@@ -35,5 +37,9 @@ public class AnalyzedFrame {
 
 	public double[] getDetectedPitchClasses() {
 		return detectedPitchClasses;
+	}
+
+	public Integer getKey() {
+		return key;
 	}
 }

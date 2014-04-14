@@ -35,6 +35,7 @@ public class MusicAnalyzer implements SoundConsumer {
 	private PercussionSuppressor percussionSuppressor;
 	private SpectralEqualizer spectralEqualizer;
 	private Median medianFilter;
+	private KeyDetector keyDetector;
 
 	private double[] samples;
 	/** peak amplitude spectrum */
@@ -43,6 +44,8 @@ public class MusicAnalyzer implements SoundConsumer {
 
 	private AtomicBoolean initialized = new AtomicBoolean();
 	private AtomicBoolean accumulatorEnabled = new AtomicBoolean();
+
+	private double[] accumulatedOctaveBins;
 
 	private static final boolean BIN_SMOOTHER_ENABLED = false;
 	private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = true;
@@ -87,6 +90,8 @@ public class MusicAnalyzer implements SoundConsumer {
 		}
 		percussionSuppressor = new PercussionSuppressor(ctx.getTotalBins(), 7);
 		spectralEqualizer = new SpectralEqualizer(ctx.getTotalBins(), 50);
+		keyDetector = new KeyDetector(ctx.getBinsPerHalftone(),
+			ctx.getHalftonesPerOctave());
 
 		cqt = new FastCqt(ctx);
 		cqt.init();
@@ -161,8 +166,10 @@ public class MusicAnalyzer implements SoundConsumer {
 			noiseGate.filter(smoothedOctaveBins);
 		}
 
+		Integer estimatedKey = keyDetector.detectKey(accumulatedOctaveBins);
+
 		AnalyzedFrame pcProfile = new AnalyzedFrame(ctx, allBins,
-			smoothedOctaveBins, detectedPitchClasses);
+			smoothedOctaveBins, detectedPitchClasses, estimatedKey);
 		return pcProfile;
 	}
 
@@ -182,7 +189,7 @@ public class MusicAnalyzer implements SoundConsumer {
 
 	private double[] smooth(double[] octaveBins) {
 		double[] smoothedOctaveBins = null;
-		double[] accumulatedOctaveBins = accumulator.smooth(octaveBins);
+		accumulatedOctaveBins = accumulator.smooth(octaveBins);
 		if (accumulatorEnabled.get()) {
 			//accumulator.add(octaveBins);
 			//smoothedOctaveBins = accumulator.getAverage();

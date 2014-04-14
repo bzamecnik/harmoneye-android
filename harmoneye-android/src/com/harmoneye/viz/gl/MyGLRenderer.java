@@ -23,6 +23,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
+import android.view.SurfaceView;
 
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.android.R;
@@ -47,7 +48,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	private static final int GL_COVERAGE_BUFFER_BIT_NV = 0x8000;
 
 	private static final float OUTER_CIRCLE_SCALE = 0.9f;
-	private static final float INNER_CIRCLE_SCALE = 0.2f;
+	private static final float INNER_CIRCLE_SCALE = 0.1f;
 
 	private final float[] modelViewProjection = new float[16];
 	private final float[] projection = new float[16];
@@ -69,6 +70,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 	private Context activityContext;
 
+	private AnalyzedFrame frame;
+
+	private Circle keyCircle;
+
+	private float[] keyCircleModel = new float[16];
+
 	public MyGLRenderer(Context context) {
 		this.activityContext = context;
 	}
@@ -85,9 +92,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		float[] darkGrey = new float[] { 0.1f, 0.1f, 0.1f, 1.0f };
 		outerCircle = new Circle(100, OUTER_CIRCLE_SCALE, null, midGrey);
 		innerCircle = new Circle(30, INNER_CIRCLE_SCALE, darkGrey, midGrey);
+		keyCircle = new Circle(30, 0.12f, null, midGrey);
 		circularGrid = new CircularGrid(12, OUTER_CIRCLE_SCALE, midGrey);
 		introLogo = new TexturedQuad(activityContext, R.drawable.intro, 0.6f);
-		toneNames = new TexturedQuad(activityContext, R.drawable.tone_name_circle, OUTER_CIRCLE_SCALE);
+		toneNames = new TexturedQuad(activityContext,
+			R.drawable.tone_name_circle, OUTER_CIRCLE_SCALE);
 		initialized = true;
 	}
 
@@ -99,7 +108,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		} else {
 			GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		}
-		
+
 		int clearMask = GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT;
 		if (msaaEnabled) {
 			clearMask |= GL_COVERAGE_BUFFER_BIT_NV;
@@ -115,7 +124,25 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 				circularGrid.draw(modelViewProjection);
 				circularSectorGraph.draw(modelViewProjection);
 				innerCircle.draw(modelViewProjection);
+				drawSelectedKeyCircle(modelViewProjection);
 			}
+		}
+	}
+
+	private void drawSelectedKeyCircle(float[] modelViewProjection) {
+		if (frame.getKey() != null) {
+			Matrix.setIdentityM(keyCircleModel, 0);
+			float angle = 90f - 360.0f * frame.getKey()
+				/ frame.getCtxContext().getHalftonesPerOctave();
+			Matrix.setRotateM(keyCircleModel, 0, angle, 0, 0, 1);
+			Matrix.translateM(keyCircleModel, 0, 0.72f, 0, 0);
+			Matrix.multiplyMM(keyCircleModel,
+				0,
+				modelViewProjection,
+				0,
+				keyCircleModel,
+				0);
+			keyCircle.draw(keyCircleModel);
 		}
 	}
 
@@ -132,22 +159,21 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 			float ratio = (float) height / width;
 			Matrix.orthoM(projection, 0, -1, 1, -ratio, ratio, -1, 1);
 		}
-		
-//		if (width > height) {
-//			float ratio = (float) width / height;
-//			Matrix.orthoM(projection, 0, -ratio, ratio, -1, 1, -1, 1);
-//		} else {
-//			float ratio = (float) height / width;
-//			Matrix.orthoM(projection, 0, -1, 1, -ratio, ratio, -1, 1);
-//		}
+
+		// if (width > height) {
+		// float ratio = (float) width / height;
+		// Matrix.orthoM(projection, 0, -ratio, ratio, -1, 1, -1, 1);
+		// } else {
+		// float ratio = (float) height / width;
+		// Matrix.orthoM(projection, 0, -1, 1, -ratio, ratio, -1, 1);
+		// }
 
 		// Set the camera position (View matrix)
 		Matrix.setLookAtM(view, 0, 0, 0, 1, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-//		Matrix.setLookAtM(view, 0, 0, 0, 0, 0, 0, -1, 0, 1, 0);
+		// Matrix.setLookAtM(view, 0, 0, 0, 0, 0, 0, -1, 0, 1, 0);
 
 		// Calculate the projection and view transformation
 		Matrix.multiplyMM(modelViewProjection, 0, projection, 0, view, 0);
-
 	}
 
 	/**
@@ -158,10 +184,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	 * method to debug shader coding errors.
 	 * </p>
 	 * 
-	 * @param type
-	 *          - Vertex or fragment shader type.
-	 * @param shaderCode
-	 *          - String containing the shader code.
+	 * @param type - Vertex or fragment shader type.
+	 * @param shaderCode - String containing the shader code.
 	 * @return - Returns an id for the shader.
 	 */
 	public static int loadShader(int type, String shaderCode) {
@@ -187,8 +211,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	 * 
 	 * If the operation is not successful, the check throws an error.
 	 * 
-	 * @param glOperation
-	 *          - Name of the OpenGL call to check.
+	 * @param glOperation - Name of the OpenGL call to check.
 	 */
 	public static void checkGlError(String glOperation) {
 		int error;
@@ -202,6 +225,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		if (initialized) {
 			circularSectorGraph.setValue(frame);
 		}
+		this.frame = frame;
 		hasValue = true;
 	}
 
