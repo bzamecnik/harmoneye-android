@@ -15,7 +15,6 @@ import com.harmoneye.android.R;
 import com.harmoneye.audio.android.AudioRecordDiscovery;
 import com.harmoneye.audio.android.AudioRecordDiscovery.AudioRecordParams;
 import com.harmoneye.audio.android.SoundCapture;
-import com.harmoneye.viz.OpenGlVisualizer;
 import com.harmoneye.viz.gl.MyGLSurfaceView;
 
 public class HarmonEyeActivity extends Activity {
@@ -27,7 +26,6 @@ public class HarmonEyeActivity extends Activity {
 	private volatile SoundCapture soundCapture;
 	private volatile MusicAnalyzer musicAnalyzer;
 	private Timer updateTimer;
-	private OpenGlVisualizer visualizer;
 	private MyGLSurfaceView glView;
 
 	@Override
@@ -40,12 +38,11 @@ public class HarmonEyeActivity extends Activity {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		glView = new MyGLSurfaceView(this);
-		visualizer = new OpenGlVisualizer(glView);
 
 		AudioRecordParams audioRecordParams = new AudioRecordDiscovery()
 			.findParams();
 
-		musicAnalyzer = new MusicAnalyzer(visualizer,
+		musicAnalyzer = new MusicAnalyzer(glView,
 			audioRecordParams.getSampleRate(),
 			audioRecordParams.getBitsPerSample());
 		new Thread(new Runnable() {

@@ -4,13 +4,15 @@ import android.content.Context;
 import android.opengl.GLSurfaceView;
 
 import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.viz.Visualizer;
 
 /**
  * A view container where OpenGL ES graphics can be drawn on screen. This view
  * can also be used to capture touch events, such as a user interacting with
  * drawn objects.
  */
-public class MyGLSurfaceView extends GLSurfaceView {
+public class MyGLSurfaceView extends GLSurfaceView implements
+	Visualizer<AnalyzedFrame> {
 
 	private final MyGLRenderer renderer;
 	private final MultisampleConfigChooser msaaConfigChooser;
@@ -33,7 +35,8 @@ public class MyGLSurfaceView extends GLSurfaceView {
 		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 	}
 
-	public void setValue(AnalyzedFrame frame) {
+	@Override
+	public void update(AnalyzedFrame frame) {
 		renderer.setValue(frame);
 		requestRender();
 	}
