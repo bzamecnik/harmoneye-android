@@ -12,7 +12,9 @@ import android.view.WindowManager;
 
 import com.harmoneye.analysis.MusicAnalyzer;
 import com.harmoneye.android.R;
-import com.harmoneye.audio.android.Capture;
+import com.harmoneye.audio.android.AudioRecordDiscovery;
+import com.harmoneye.audio.android.AudioRecordDiscovery.AudioRecordParams;
+import com.harmoneye.audio.android.SoundCapture;
 import com.harmoneye.viz.OpenGlVisualizer;
 import com.harmoneye.viz.gl.MyGLSurfaceView;
 
@@ -22,11 +24,11 @@ public class HarmonEyeActivity extends Activity {
 
 	private static final int TIME_PERIOD_MILLIS = 25;
 
-	private Capture soundCapture;
-	private MyGLSurfaceView glView;
-	private OpenGlVisualizer visualizer;
-
+	private volatile SoundCapture soundCapture;
+	private volatile MusicAnalyzer musicAnalyzer;
 	private Timer updateTimer;
+	private OpenGlVisualizer visualizer;
+	private MyGLSurfaceView glView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,17 +42,28 @@ public class HarmonEyeActivity extends Activity {
 		glView = new MyGLSurfaceView(this);
 		visualizer = new OpenGlVisualizer(glView);
 
+		AudioRecordParams audioRecordParams = new AudioRecordDiscovery()
+			.findParams();
+
+		musicAnalyzer = new MusicAnalyzer(visualizer,
+			audioRecordParams.getSampleRate(),
+			audioRecordParams.getBitsPerSample());
+		new Thread(new Runnable() {
+			public void run() {
+				musicAnalyzer.initialize();
+			}
+		}).start();
+
+		soundCapture = new SoundCapture(musicAnalyzer, audioRecordParams);
+
 		setContentView(glView);
 	}
 
 	private void toggle() {
-		boolean isRunning = soundCapture != null && soundCapture.isRunning();
+		boolean isRunning = soundCapture.isRunning();
 		if (isRunning) {
 			stop();
 		} else {
-			if (soundCapture == null) {
-				soundCapture = new Capture(visualizer);
-			}
 			Thread thread = new Thread(soundCapture);
 			thread.start();
 
@@ -64,19 +77,14 @@ public class HarmonEyeActivity extends Activity {
 		TimerTask updateTask = new TimerTask() {
 			@Override
 			public void run() {
-				MusicAnalyzer musicAnalyzer = soundCapture.getMusicAnalyzer();
-				if (musicAnalyzer != null) {
-					musicAnalyzer.updateSignal();
-				}
+				musicAnalyzer.updateSignal();
 			}
 		};
 		updateTimer.scheduleAtFixedRate(updateTask, 200, TIME_PERIOD_MILLIS);
 	}
 
 	private void stop() {
-		if (soundCapture != null) {
-			soundCapture.stop();
-		}
+		soundCapture.stop();
 		if (updateTimer != null) {
 			updateTimer.cancel();
 		}

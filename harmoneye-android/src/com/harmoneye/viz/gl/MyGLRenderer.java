@@ -23,7 +23,6 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
-import android.view.SurfaceView;
 
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.android.R;

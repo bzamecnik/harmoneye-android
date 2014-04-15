@@ -56,7 +56,7 @@ public class MusicAnalyzer implements SoundConsumer {
 	private static final boolean NOISE_GATE_MEDIAN_THRESHOLD_ENABLED = false;
 
 	public MusicAnalyzer(Visualizer<AnalyzedFrame> visualizer,
-		float sampleRate, int bitsPerSample) {
+		double sampleRate, int bitsPerSample) {
 		this.visualizer = visualizer;
 
 		//@formatter:off
@@ -94,12 +94,16 @@ public class MusicAnalyzer implements SoundConsumer {
 			ctx.getHalftonesPerOctave());
 
 		cqt = new FastCqt(ctx);
+	}
+
+	public void initialize() {
 		cqt.init();
 		initialized.set(true);
 	}
-
+	
 	@Override
 	public void consume(double[] samples) {
+		removeMean(samples);
 		ringBufferBank.write(samples);
 	}
 
@@ -209,4 +213,20 @@ public class MusicAnalyzer implements SoundConsumer {
 		}
 	}
 
+	// remove DC bias
+	private void removeMean(double[] values) {
+		double mean = mean(values);
+		for (int i = 0; i < values.length; i++) {
+			values[i] -= mean; 
+		}
+	}
+	
+	private double mean(double[] values) {
+		double mean = 0;
+		for (int i = 0; i < values.length; i++) {
+			mean += values[i];
+		}
+		mean /= values.length;
+		return mean;
+	}
 }
