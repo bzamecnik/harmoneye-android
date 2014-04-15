@@ -25,8 +25,8 @@ public class HarmonEyeActivity extends Activity {
 
 	private volatile SoundCapture soundCapture;
 	private volatile MusicAnalyzer musicAnalyzer;
-	private Timer updateTimer;
 	private MyGLSurfaceView glView;
+	private Timer updateTimer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

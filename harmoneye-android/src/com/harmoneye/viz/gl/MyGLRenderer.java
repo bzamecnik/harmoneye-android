@@ -24,7 +24,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.analysis.MusicAnalyzer.AnalyzedFrame;
 import com.harmoneye.android.R;
 import com.harmoneye.viz.gl.shape.Circle;
 import com.harmoneye.viz.gl.shape.CircularGrid;

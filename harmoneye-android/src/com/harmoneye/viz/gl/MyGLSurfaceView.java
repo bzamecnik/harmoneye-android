@@ -1,9 +1,12 @@
 package com.harmoneye.viz.gl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 
-import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.analysis.MusicAnalyzer.AnalyzedFrame;
 import com.harmoneye.viz.Visualizer;
 
 /**
@@ -16,6 +19,7 @@ public class MyGLSurfaceView extends GLSurfaceView implements
 
 	private final MyGLRenderer renderer;
 	private final MultisampleConfigChooser msaaConfigChooser;
+	private Map<String, Object> config = new HashMap<String, Object>();
 
 	public MyGLSurfaceView(Context context) {
 		super(context);
@@ -39,5 +43,10 @@ public class MyGLSurfaceView extends GLSurfaceView implements
 	public void update(AnalyzedFrame frame) {
 		renderer.setValue(frame);
 		requestRender();
+	}
+
+	@Override
+	public Map<String, Object> getConfig() {
+		return config;
 	}
 }

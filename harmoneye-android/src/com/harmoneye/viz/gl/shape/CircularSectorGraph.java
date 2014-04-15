@@ -8,7 +8,7 @@ import java.nio.ShortBuffer;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
-import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.analysis.MusicAnalyzer.AnalyzedFrame;
 import com.harmoneye.math.cqt.CqtContext;
 import com.harmoneye.music.TonicDistance;
 import com.harmoneye.viz.gl.MyGLRenderer;
