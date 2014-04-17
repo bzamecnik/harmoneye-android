@@ -304,7 +304,7 @@ public class CircularSectorGraph {
 		this.frame = frame;
 
 		if (frame != null) {
-			CqtContext ctx = frame.getCtxContext();
+			CqtContext ctx = frame.getCqtContext();
 			binsPerHalftone = ctx.getBinsPerHalftone();
 			halftoneCount = ctx.getHalftonesPerOctave();
 

@@ -132,7 +132,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		if (frame.getKey() != null) {
 			Matrix.setIdentityM(keyCircleModel, 0);
 			float angle = 90f - 360.0f * frame.getKey()
-				/ frame.getCtxContext().getHalftonesPerOctave();
+				/ frame.getCqtContext().getHalftonesPerOctave();
 			Matrix.setRotateM(keyCircleModel, 0, angle, 0, 0, 1);
 			Matrix.translateM(keyCircleModel, 0, 0.72f, 0, 0);
 			Matrix.multiplyMM(keyCircleModel,
