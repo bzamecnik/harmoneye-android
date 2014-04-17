@@ -261,13 +261,14 @@ public class CircularSectorGraph {
 			int movedPitchClass = (pitchClass * pitchStep) % halftoneCount;
 			int index = movedPitchClass * binsPerHalftone + binInPitchClass;
 			float value = (float) values[index];
+			value = Math.max(Math.min(value, 1.0f), 0.0f);
 
 			Matrix.setIdentityM(model, 0);
 
 			float angle = -(i - halfBinsPerHalftone) * sectorCountInvDegrees;
 			Matrix.setRotateM(model, 0, angle, 0, 0, 1);
 
-			float sectorLength = scale * value;
+			float sectorLength = 0.65f * scale * value;
 			float xScale = sectorLength * tanAlpha * epsilon;
 			float yScale = sectorLength;
 			Matrix.scaleM(model, 0, xScale, yScale, 1);
@@ -282,7 +283,7 @@ public class CircularSectorGraph {
 			float hue = key != null ? tonicDistance.distanceToHue(tonicDistance
 				.distance(movedPitchClass, key)) : 0;
 			float saturation = key != null ? 0.1f + 0.75f * value : 0;
-			float brightness = 0.25f + 0.75f * value;
+			float brightness = 0.25f + 0.55f * value;
 
 			GLES20.glUniform1f(hueHandle, hue);
 			MyGLRenderer.checkGlError("glUniform1f");
