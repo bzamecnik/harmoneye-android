@@ -1,5 +1,8 @@
 # Changelog - HarmonEye for Android
 
+## 1.3 (2014-04-17)
+- improved filtering for much clearer display of the tones
+
 ## 1.2 (2014-04-14)
 - allows to automatically detect the musical key
 - colorizes the diagram according to the distance from the found key
